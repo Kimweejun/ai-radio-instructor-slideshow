@@ -31,11 +31,11 @@ button{font:inherit;color:inherit}
 .top nav button{background:none;border:0;padding:6px 10px;border-radius:6px;font-size:13.5px;color:var(--muted);cursor:pointer}
 .top nav button:hover,.top nav button[aria-pressed="true"]{color:var(--ink);background:var(--field)}
 .bot{display:flex;align-items:center;gap:8px;padding:10px 20px;border-top:1px solid var(--line);flex:none}
-.bot button{background:var(--field);border:1px solid var(--line);border-radius:8px;padding:7px 14px;font-size:13.5px;cursor:pointer}
+.bot button{flex:none;white-space:nowrap;background:var(--field);border:1px solid var(--line);border-radius:8px;padding:7px 14px;font-size:13.5px;cursor:pointer}
 .bot button:hover{border-color:var(--olive)}
 .bot button[aria-pressed="true"]{background:var(--olive);border-color:var(--olive);color:var(--olive-ink)}
-.bot .ttl{font-size:13.5px;font-weight:700;margin-left:6px}
-.bot .cnt{margin-left:auto;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.bot .ttl{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13.5px;font-weight:700;margin-left:6px}
+.bot .cnt{flex:none;white-space:nowrap;margin-left:auto;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
 #notes{flex:none;max-height:24vh;overflow:auto;border-top:1px solid var(--line);padding:14px 24px;line-height:1.7;font-size:15px;background:var(--field)}
 #notes p{margin:0 0 6px;max-width:110ch}
 #notes[hidden]{display:none}
