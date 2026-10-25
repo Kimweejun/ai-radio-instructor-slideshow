@@ -47,7 +47,7 @@ hyperframes-slideshow{display:block;position:absolute;left:50%;top:50%;width:min
 body.full hyperframes-slideshow{width:min(100cqw,177.78cqh);height:min(100cqh,56.25cqw);border-radius:0;box-shadow:none}
 hyperframes-player{position:absolute;inset:0}
 hyperframes-slideshow:focus,hyperframes-slideshow:focus-visible{outline:none}
-.progress{position:absolute;left:0;bottom:0;height:3px;width:0;background:var(--signal);transition:width .5s cubic-bezier(.2,.8,.2,1)}
+.progress{position:absolute;left:0;bottom:0;height:3px;width:100%;background:var(--signal);transform:scaleX(0);transform-origin:left;transition:transform .5s cubic-bezier(.2,.8,.2,1)}
 /* 슬라이드쇼 기본 조작 캡슐은 숨기고 아래 바로 대신함 */
 hyperframes-slideshow [data-hf-nav-cluster]{display:none!important}
 [data-hf-chrome]{container-type:size}
@@ -766,7 +766,7 @@ hyperframes-slideshow .hf-hotspot-pill:focus-visible{outline:2px solid var(--sig
     } else {
       const i = MAINS.findIndex(m => m.id === id);
       $('cnt').textContent = (i + 1) + ' / ' + MAINS.length;
-      $('prog').style.width = ((i + 1) / MAINS.length * 100) + '%';
+      $('prog').style.transform = 'scaleX(' + ((i + 1) / MAINS.length) + ')';
       $('prev').textContent = '◀ 이전';
       $('next').textContent = '다음 ▶';
     }
