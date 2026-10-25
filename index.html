@@ -1,0 +1,811 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI 무전 교관</title>
+<link rel="icon" href="assets/logo_dark.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Nanum+Gothic+Coding:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@hyperframes/player@0.8.184/dist/hyperframes-player.global.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@hyperframes/player@0.8.184/dist/slideshow/hyperframes-slideshow.global.js"></script>
+<style>
+:root{
+  --paper:#ECEEE8; --ink:#1D2A24; --muted:#5C6860; --olive:#4E5D3C; --olive-ink:#F1F3EC; --signal:#F2A900;
+  --sans:'IBM Plex Sans KR','Malgun Gothic','Apple SD Gothic Neo',sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#252C28;font-family:var(--sans);word-break:keep-all}
+/* 슬라이드쇼 상자를 화면에 맞춘 16:9로: 핫스팟 위치(%)가 슬라이드와 정확히 겹치도록 */
+hyperframes-slideshow{display:block;position:absolute;left:50%;top:50%;width:min(100vw,177.78vh);height:min(100vh,56.25vw);transform:translate(-50%,-50%);container-type:size;outline:none;--hf-slideshow-accent:var(--olive)}
+hyperframes-player{position:absolute;inset:0}
+/* 부록 참조 핫스팟: 작은 번호 배지, 마우스를 올리면 '부록 N 참고' */
+hyperframes-slideshow .hf-hotspot-pill{min-width:1.19cqw!important;height:1.19cqw!important;padding:0 .3cqw!important;gap:0!important;justify-content:center!important;border-radius:999px!important;background:var(--olive)!important;color:var(--olive-ink)!important;font-size:0!important;box-shadow:none!important;animation:none!important}
+hyperframes-slideshow .hf-hotspot-pill>span{display:none!important}
+hyperframes-slideshow .hf-hotspot-pill::before{content:attr(data-hotspot-id);font:600 .78cqw/1 var(--sans);color:var(--olive-ink)}
+hyperframes-slideshow .hf-hotspot-pill::after{content:attr(aria-label);position:absolute;left:50%;bottom:calc(100% + .45cqw);transform:translateX(-50%);background:var(--ink);color:var(--olive-ink);font:500 .94cqw/1.3 var(--sans);padding:.38cqw .62cqw;border-radius:.25cqw;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .12s}
+hyperframes-slideshow .hf-hotspot-pill:hover::after,hyperframes-slideshow .hf-hotspot-pill:focus-visible::after{opacity:1}
+hyperframes-slideshow .hf-hotspot-pill:hover{background:var(--ink)!important}
+/* 클릭 영역 넓히기: 투명 테두리만큼 바깥으로, 위치는 음수 여백으로 보정 */
+hyperframes-slideshow .hf-hotspot-pill{border:.45cqw solid transparent!important;background-clip:padding-box!important;margin:-.45cqw 0 0 -.45cqw!important;min-width:calc(1.19cqw + .9cqw)!important;height:calc(1.19cqw + .9cqw)!important}
+hyperframes-slideshow .hf-hotspot-pill:focus-visible{outline:2px solid var(--signal)!important;outline-offset:1px}
+#play:focus-visible{outline:3px solid var(--ink);outline-offset:6px}
+::selection{background:#FBE3A6;color:#1D2A24}
+/* 전체화면에서 화면비가 16:9가 아니어도 배지가 슬라이드와 겹치도록 크롬을 16:9로 맞춤 */
+[data-hf-chrome]{container-type:size}
+hyperframes-slideshow:fullscreen:not([data-hf-presenting="true"]) [data-hf-chrome]{inset:auto!important;left:50%!important;top:50%!important;width:min(100vw,177.78vh)!important;height:min(100vh,56.25vw)!important;transform:translate(-50%,-50%)}
+/* ---------- 시작 화면 · 인트로 (ugv2 발표와 같은 흐름) ---------- */
+#start{position:fixed;inset:0;z-index:60;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;transition:opacity .5s ease}
+#start.out{opacity:0;pointer-events:none}
+#start img{height:54px}
+#play{width:120px;height:120px;border-radius:50%;border:none;background:var(--signal);cursor:pointer;position:relative;box-shadow:0 10px 30px rgba(242,169,0,.35);transition:transform .2s ease}
+#play:hover{transform:scale(1.06)}
+#play::after{content:'';position:absolute;left:50%;top:50%;transform:translate(-38%,-50%);border-left:34px solid #fff;border-top:21px solid transparent;border-bottom:21px solid transparent}
+#play::before{content:'';position:absolute;inset:-10px;border-radius:50%;border:2px solid var(--signal);opacity:.5;animation:ring 2s ease-out infinite}
+@keyframes ring{from{transform:scale(.92);opacity:.6}to{transform:scale(1.25);opacity:0}}
+#start p{margin:0;color:var(--muted);font-size:15px;text-align:center;line-height:1.7}
+#start p b{color:var(--ink);font-size:20px;display:block}
+#intro{display:none;position:fixed;inset:0;z-index:50;background:#0d120e;color:#F3F5F1;overflow:hidden;cursor:pointer;transition:opacity .9s ease}
+#intro.out{opacity:0;pointer-events:none}
+#intro canvas{position:absolute;inset:0;width:100%;height:100%}
+#icode{position:absolute;left:28px;top:24px;width:min(46vw,600px);font:12px/1.65 "JetBrains Mono","Nanum Gothic Coding",Consolas,monospace;color:#7fa77a;opacity:.85;white-space:pre;overflow:hidden;height:40vh;-webkit-mask-image:linear-gradient(#000 70%,transparent);mask-image:linear-gradient(#000 70%,transparent)}
+#icode .k{color:var(--signal)} #icode .d{color:#566a58}
+#ihud{position:absolute;right:28px;top:24px;font:12px/1.8 "JetBrains Mono","Nanum Gothic Coding",Consolas,monospace;color:#9fb59c;text-align:right}
+#ihud b{color:var(--signal)} #ihud img{height:34px;display:block;margin-left:auto;margin-bottom:12px}
+#ititle{position:absolute;left:6vw;bottom:16vh;max-width:88vw;text-shadow:0 2px 18px #0d120e}
+#itg{font:700 13px "JetBrains Mono",Consolas,monospace;color:var(--signal);letter-spacing:.2em;margin-bottom:14px;opacity:0;transform:translateY(8px);transition:all .6s ease}
+#itt{margin:0;font-weight:700;font-size:clamp(34px,6.2vw,86px);line-height:1.08;letter-spacing:-0.02em}
+#itt span{display:inline-block;opacity:0;transform:translateY(24px);filter:blur(6px);transition:opacity .5s ease,transform .5s cubic-bezier(.2,.8,.2,1),filter .5s ease}
+#itt span.on,#itg.on,#isb.on{opacity:1;transform:none;filter:none}
+#isb{margin-top:18px;font-size:clamp(15px,1.5vw,20px);color:#c9d1c5;opacity:0;transform:translateY(8px);transition:all .6s ease}
+#ihint{position:absolute;left:50%;bottom:5vh;transform:translateX(-50%);font:12px "JetBrains Mono",Consolas,monospace;color:#9fb59c;letter-spacing:.15em;animation:blink 1.6s steps(2) infinite}
+@keyframes blink{50%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){#play::before,#ihint{animation:none}}
+
+
+</style>
+</head>
+<body>
+<div id="start">
+  <img src="assets/logo_dark.png" alt="A4AI">
+  <button id="play" type="button" aria-label="인트로 재생"></button>
+  <p><b>AI 무전 교관</b>K-방산 2차 아이디어 내부 발표, 2026년 10월</p>
+</div>
+
+<div id="intro" role="dialog" aria-label="인트로 애니메이션">
+  <canvas id="cv"></canvas>
+  <div id="icode" aria-hidden="true"></div>
+  <div id="ihud" aria-hidden="true"><img src="assets/logo_light.png" alt="">RADIO TRAINING ENGINE<br>FIELDS <b>7</b> · 시간 / 좌표 / 명령 / 상황 / 부대명 / 표적명 / 자산명<br>UTTERANCES <b id="iutt">0</b><br>LABELED FIELDS <b id="ilab">0</b></div>
+  <div id="ititle"><div id="itg">A4AI · RADIO PROCEDURE TRAINING AI</div><h2 id="itt"></h2><div id="isb">1단계 전장 음성 엔진의 다음 걸음 · ㈜에이포에이아이 · 2026.10</div></div>
+  <div id="ihint">CLICK OR PRESS ANY KEY TO START</div>
+</div>
+
+<hyperframes-slideshow id="show" tabindex="0" notes-storage-key="a4ai-ai-radio-instructor">
+  <hyperframes-player interactive src="composition/index.html"></hyperframes-player>
+  <!-- 섬 복사본: composition/index.html 의 섬과 항상 같아야 함 (build_wrapper.py가 함께 갱신) -->
+  <script type="application/hyperframes-slideshow+json">
+{
+  "slides": [
+    {
+      "sceneId": "s0",
+      "notes": "안녕하십니까. 오늘은 K-방산 2차 아이디어로 AI 무전 교관을 제안드리겠습니다.\n\n한 줄로 말씀드리면, 1단계에서 만들고 있는 전장 음성 엔진으로 쓰일수록 데이터가 쌓이는 제품을 만들자는 이야기입니다. 화면의 무전 한 줄이 노란 표시처럼 시간, 좌표, 표적, 상황으로 나뉘는 것, 이것이 저희 기술의 핵심입니다.\n\n참고로 오른쪽 사진은 AI로 생성한 이미지입니다."
+    },
+    {
+      "sceneId": "toc",
+      "notes": "오늘은 네 부분으로 말씀드리겠습니다.\n\n먼저 저희가 지금 가진 자산을 보고, 이어서 오늘 가장 강조하고 싶은 데이터 이야기를 드리겠습니다. 그다음 AI 무전 교관이 무엇이고 어떻게 동작하는지, 마지막으로 어디까지 확장하고 어떻게 시작할지 말씀드리겠습니다.\n\n세부 근거는 부록 1부터 13까지에 모아 두었습니다.",
+      "hotspots": [
+        {
+          "id": "1",
+          "label": "부록 1 참고",
+          "target": "seq-appA",
+          "region": {
+            "x": 8.494,
+            "y": 89.498,
+            "w": 1.188,
+            "h": 2.111
+          }
+        },
+        {
+          "id": "2",
+          "label": "부록 2 참고",
+          "target": "seq-appB",
+          "region": {
+            "x": 10.057,
+            "y": 89.498,
+            "w": 1.188,
+            "h": 2.111
+          }
+        },
+        {
+          "id": "3",
+          "label": "부록 3 참고",
+          "target": "seq-appC",
+          "region": {
+            "x": 11.619,
+            "y": 89.498,
+            "w": 1.188,
+            "h": 2.111
+          }
+        },
+        {
+          "id": "4",
+          "label": "부록 4 참고",
+          "target": "seq-appD",
+          "region": {
+            "x": 13.182,
+            "y": 89.498,
+            "w": 1.188,
+            "h": 2.111
+          }
+        },
+        {
+          "id": "5",
+          "label": "부록 5 참고",
+          "target": "seq-appE",
+          "region": {
+            "x": 14.744,
+            "y": 89.498,
+            "w": 1.187,
+            "h": 2.111
+          }
+        },
+        {
+          "id": "6",
+          "label": "부록 6 참고",
+          "target": "seq-appF",
+          "region": {
+            "x": 16.307,
+            "y": 89.498,
+            "w": 1.187,
+            "h": 2.111
+          }
+        },
+        {
+          "id": "7",
+          "label": "부록 7 참고",
+          "target": "seq-appG",
+          "region": {
+            "x": 17.869,
+            "y": 89.498,
+            "w": 1.187,
+            "h": 2.111
+          }
+        },
+        {
+          "id": "8",
+          "label": "부록 8 참고",
+          "target": "seq-appH",
+          "region": {
+            "x": 19.432,
+            "y": 89.498,
+            "w": 1.187,
+            "h": 2.111
+          }
+        },
+        {
+          "id": "9",
+          "label": "부록 9 참고",
+          "target": "seq-appI",
+          "region": {
+            "x": 20.994,
+            "y": 89.498,
+            "w": 1.187,
+            "h": 2.111
+          }
+        },
+        {
+          "id": "10",
+          "label": "부록 10 참고",
+          "target": "seq-appJ",
+          "region": {
+            "x": 22.557,
+            "y": 89.498,
+            "w": 1.563,
+            "h": 2.111
+          }
+        },
+        {
+          "id": "11",
+          "label": "부록 11 참고",
+          "target": "seq-appK",
+          "region": {
+            "x": 24.494,
+            "y": 89.498,
+            "w": 1.563,
+            "h": 2.111
+          }
+        },
+        {
+          "id": "12",
+          "label": "부록 12 참고",
+          "target": "seq-appL",
+          "region": {
+            "x": 26.432,
+            "y": 89.498,
+            "w": 1.563,
+            "h": 2.111
+          }
+        },
+        {
+          "id": "13",
+          "label": "부록 13 참고",
+          "target": "seq-appM",
+          "region": {
+            "x": 28.369,
+            "y": 89.498,
+            "w": 1.563,
+            "h": 2.111
+          }
+        },
+        {
+          "id": "출처",
+          "label": "출처 참고",
+          "target": "seq-appZ",
+          "region": {
+            "x": 30.307,
+            "y": 89.498,
+            "w": 2.02,
+            "h": 2.111
+          }
+        }
+      ]
+    },
+    {
+      "sceneId": "s2",
+      "notes": "저희가 어디에 서 있는지부터 보겠습니다.\n\n1단계 과제에서 저희는 교환기 스위치에서 음성을 받아 텍스트로 바꾸고, 군 용어와 숫자, 좌표를 보정하고, 시간·좌표·명령 같은 7개 필드로 정리한 뒤, 사람이 승인한 결과를 저장하는 서버를 만들고 있습니다.\n\n여기에 GCS Saker 관제 화면, 무전기 소음감쇄 칩 과제, 지휘관 의사결정 지원 SW가 있습니다. 그리고 과제책임자가 통신장교 출신입니다.\n\n오늘 제안은 이 자산들을 거의 그대로 쓰는 쪽으로 설계했습니다.",
+      "hotspots": [
+        {
+          "id": "2",
+          "label": "부록 2 참고",
+          "target": "seq-appB",
+          "region": {
+            "x": 26.874,
+            "y": 17.611,
+            "w": 1.187,
+            "h": 2.111
+          }
+        }
+      ]
+    },
+    {
+      "sceneId": "s3",
+      "notes": "두 번째 파트는 데이터입니다. 오늘 발표에서 가장 강조하고 싶은 부분입니다.\n\n왼쪽은 국방대학교 연구입니다. 같은 Whisper 모델에 어떤 군 데이터를 학습시켰느냐에 따라 문자 오류율이 13.68%에서 7.94%까지 달라졌습니다. 용어사전만 학습하면 거의 그대로였고, 전술 개념이 담긴 교범을 학습했을 때 가장 정확했습니다.\n\n해외도 마찬가지입니다. 항공 무선 교신에서 시판 음성인식의 단어 오류율은 80%였는데, 그 분야 데이터로 맞춤화하자 15% 미만이 됐습니다. 싱가포르 관제 훈련 연구에서도 최대 107.8%가 23.45%로 내려갔습니다.\n\n모델은 누구나 가져다 쓸 수 있습니다. 차이를 만드는 건 그 분야 데이터입니다.",
+      "hotspots": [
+        {
+          "id": "3",
+          "label": "부록 3 참고",
+          "target": "seq-appC",
+          "region": {
+            "x": 38.352,
+            "y": 23.5,
+            "w": 1.187,
+            "h": 2.111
+          }
+        },
+        {
+          "id": "2",
+          "label": "부록 2 참고",
+          "target": "seq-appB",
+          "region": {
+            "x": 88.166,
+            "y": 60.856,
+            "w": 1.187,
+            "h": 2.111
+          }
+        }
+      ]
+    },
+    {
+      "sceneId": "s4",
+      "notes": "그런데 그 군 음성 데이터는 어디서 왔을까요. 모두 직접 만들어 썼습니다.\n\n저희 1단계도 승인받은 파일과 모의 시험망으로 시험하고 있고, 실제 운용망 연동은 후속 단계로 남겨 두었습니다. 음성 데이터는 민감정보로 반출을 통제합니다.\n\n앞 장의 국방대 연구도 현역 장교 열 명이 교범과 용어사전을 직접 읽어 녹음한 음성으로 학습했습니다. KCTC는 영상과 음성이 흩어져 있고 정제할 도구가 없다고 스스로 진단했습니다.\n\n저희 VCM 과제에서도 외부 음원은 이용 조건 확인이 어려워 라이선스가 명확한 음원을 따로 확보해 썼습니다.",
+      "hotspots": [
+        {
+          "id": "4",
+          "label": "부록 4 참고",
+          "target": "seq-appD",
+          "region": {
+            "x": 13.508,
+            "y": 20.167,
+            "w": 1.188,
+            "h": 2.111
+          }
+        },
+        {
+          "id": "3",
+          "label": "부록 3 참고",
+          "target": "seq-appC",
+          "region": {
+            "x": 62.603,
+            "y": 20.167,
+            "w": 1.188,
+            "h": 2.111
+          }
+        },
+        {
+          "id": "4 ",
+          "label": "부록 4 참고",
+          "target": "seq-appD",
+          "region": {
+            "x": 16.853,
+            "y": 44.543,
+            "w": 1.188,
+            "h": 2.111
+          }
+        }
+      ]
+    },
+    {
+      "sceneId": "s5",
+      "notes": "그래서 생각을 뒤집었습니다. 데이터를 구하러 다니는 대신, 쓰일수록 정답 데이터가 생기는 제품을 만들자는 것입니다.\n\n그런 제품은 세 가지 조건을 갖춰야 한다고 봤습니다. 정답이 미리 정해져 있어야 하고, 반복해서 쓰여야 하고, 운용망 밖에서 돌아야 합니다.\n\n이 세 조건에 맞춰 고른 것이 무전 교신 훈련입니다."
+    },
+    {
+      "sceneId": "s6",
+      "notes": "이제 AI 무전 교관입니다. 먼저 이 제품이 놓일 흐름입니다.\n\nKCTC는 훈련 분석이 분석관의 경험과 직관에 상당 부분 기대고 있어 시간과 인력이 많이 든다고 스스로 진단했습니다. 그래서 육군은 훈련 시나리오 자동 생성, 난이도 자동 조정, 훈련 중 평가와 피드백, 훈련 직후 사후검토를 연구할 예정입니다.\n\n해외에서는 캐나다군이 화력 요청 무전 절차를 음성인식과 VR로 훈련하는 연구를 했습니다.\n\nAI 무전 교관은 이 흐름을 무전 교신 훈련에 먼저 적용하는 제품입니다. 다만 현장 교관의 실제 수요는 아직 직접 확인하지 않았고, 11월에 인터뷰로 확인하겠습니다.",
+      "hotspots": [
+        {
+          "id": "11",
+          "label": "부록 11 참고",
+          "target": "seq-appK",
+          "region": {
+            "x": 61.572,
+            "y": 36.266,
+            "w": 1.563,
+            "h": 2.111
+          }
+        }
+      ]
+    },
+    {
+      "sceneId": "s7",
+      "notes": "제품은 단순합니다. AI가 상황실이나 사격지휘소 같은 상대 무전병 역할을 음성으로 맡습니다. 교육생은 절차대로 보고하고 복창합니다.\n\n시스템은 그 교신을 받아 적고, 빠진 항목, 틀린 숫자와 좌표, 절차, 응답 시간을 바로 채점합니다. 오른쪽은 가상 화면 예시인데, 시나리오가 요구한 항목이 빠지면 그 자리에서 알려줍니다.\n\n결과는 GCS Saker 기반 교관 콘솔에 모입니다. 교관은 교육생별 점수와 반복되는 실수를 보고 녹음을 다시 들어볼 수 있습니다.",
+      "hotspots": [
+        {
+          "id": "7",
+          "label": "부록 7 참고",
+          "target": "seq-appG",
+          "region": {
+            "x": 27.438,
+            "y": 47.5,
+            "w": 1.187,
+            "h": 2.111
+          }
+        },
+        {
+          "id": "6",
+          "label": "부록 6 참고",
+          "target": "seq-appF",
+          "region": {
+            "x": 61.936,
+            "y": 19.5,
+            "w": 1.187,
+            "h": 2.111
+          }
+        }
+      ]
+    },
+    {
+      "sceneId": "s8",
+      "notes": "동작 방식입니다. 일곱 단계 중 진한 초록색 네 단계는 1단계 엔진을 그대로 씁니다.\n\n새로 만드는 건 노란색 세 가지입니다. 교범을 바탕으로 정답이 들어간 시나리오, 그 시나리오를 무전기 음질로 읽어 주는 AI 역할자, 그리고 정답과 대조하는 채점기입니다.\n\n음성 수신, 음성인식과 군 용어 보정, 7필드 추출, 저장은 1단계에서 이미 만들고 있습니다. 인터넷 없이 내부망에서 돌아가는 구조도 1단계와 같습니다.",
+      "hotspots": [
+        {
+          "id": "2",
+          "label": "부록 2 참고",
+          "target": "seq-appB",
+          "region": {
+            "x": 61.573,
+            "y": 63.944,
+            "w": 1.188,
+            "h": 2.111
+          }
+        },
+        {
+          "id": "7",
+          "label": "부록 7 참고",
+          "target": "seq-appG",
+          "region": {
+            "x": 68.187,
+            "y": 63.944,
+            "w": 1.188,
+            "h": 2.111
+          }
+        }
+      ]
+    },
+    {
+      "sceneId": "s9",
+      "notes": "이 장이 앞에서 말씀드린 데이터 문제에 대한 답입니다.\n\n보통 음성 데이터는 녹음을 모으고, 사람이 듣고 받아 적고, 검수해야 만들어집니다. 앞 장처럼 군 음성은 녹음부터 직접 만들어야 했습니다.\n\nAI 무전 교관은 다릅니다. 시나리오를 저희가 쓰기 때문에 정답이 이미 있습니다. 교육생이 말하는 순간 정답이 붙은 군 음성이 한 건 저장됩니다.\n\n교육을 많이 할수록 데이터가 늘고, 인식과 채점이 정확해지고, 그래서 더 많이 쓰이는 선순환이 됩니다. 1단계 신청서에도 저장한 데이터를 2단계 학습에 쓰는 계획이 있어, 이 데이터가 그대로 재료가 됩니다.",
+      "hotspots": [
+        {
+          "id": "12",
+          "label": "부록 12 참고",
+          "target": "seq-appL",
+          "region": {
+            "x": 16.297,
+            "y": 65.054,
+            "w": 1.563,
+            "h": 2.111
+          }
+        },
+        {
+          "id": "11",
+          "label": "부록 11 참고",
+          "target": "seq-appK",
+          "region": {
+            "x": 41.55,
+            "y": 69.609,
+            "w": 1.563,
+            "h": 2.111
+          }
+        }
+      ]
+    },
+    {
+      "sceneId": "s10",
+      "notes": "K-방산 관점에서 네 가지를 확인했습니다.\n\n먼저 무기체계 분류입니다. 훈령의 무기체계 세부분류에 ‘전술훈련모의장비’라는 항목이 있습니다. 실제로 이 항목으로 분류될지는 신속원이 판단하므로 사전 문의가 필요합니다. 공모 분야로는 10대 국방전략기술 중 인공지능에 해당합니다.\n\n예산 선례도 있습니다. 이번 달 국방부의 AI 대드론 훈련 시뮬레이터 신속상용화 지원사업이 12개월, 20억 원 규모로 착수했다고 보도됐습니다.\n\n해외에는 캐나다군 화력유도 훈련 연구, 그리고 교육생 교신을 자동 채점하는 관제사 훈련 시뮬레이터 ASTRA 같은 선례가 있습니다.",
+      "hotspots": [
+        {
+          "id": "9",
+          "label": "부록 9 참고",
+          "target": "seq-appI",
+          "region": {
+            "x": 49.171,
+            "y": 23.811,
+            "w": 1.187,
+            "h": 2.111
+          }
+        },
+        {
+          "id": "10",
+          "label": "부록 10 참고",
+          "target": "seq-appJ",
+          "region": {
+            "x": 44.765,
+            "y": 46.342,
+            "w": 1.563,
+            "h": 2.111
+          }
+        },
+        {
+          "id": "8",
+          "label": "부록 8 참고",
+          "target": "seq-appH",
+          "region": {
+            "x": 51.649,
+            "y": 59.519,
+            "w": 1.188,
+            "h": 2.111
+          }
+        }
+      ]
+    },
+    {
+      "sceneId": "s12",
+      "notes": "확장 경로입니다. 교육장에서 시작합니다. 여기서 정답이 붙은 군 음성과 채점 모델을 얻습니다.\n\n다음은 훈련장입니다. KCTC 같은 과학화훈련장의 무전을 7필드로 정리해서 교전 타임라인과 사후강평 리포트를 자동으로 만듭니다. KCTC가 연구하려는 AI 전투분석체계와 같은 방향입니다.\n\n마지막이 실전입니다. 무전 내용을 표준 보고서로 만들어 사람이 승인하면 지휘통제체계로 넘깁니다. 1단계 신청서에서 그린 TICN 실증 로드맵과 같은 방향입니다.\n\n각 단계의 데이터가 다음 단계의 출발점이 됩니다. 사진은 AI로 생성한 이미지입니다.",
+      "hotspots": [
+        {
+          "id": "12",
+          "label": "부록 12 참고",
+          "target": "seq-appL",
+          "region": {
+            "x": 41.286,
+            "y": 87.325,
+            "w": 1.563,
+            "h": 2.111
+          }
+        }
+      ]
+    },
+    {
+      "sceneId": "s13",
+      "notes": "실행 계획은 모두 가안입니다.\n\nMVP는 시나리오 세 가지로 시작합니다. 정찰 보고, 화력 요청, 의무후송 요청입니다. 정확한 양식은 교범으로 확인하겠습니다.\n\n11월에는 개발보다 확인에 집중합니다. 교관 인터뷰 세 건, 경북창경과 신속원 문의, 시나리오 초안입니다. 12월은 1단계 마무리가 우선이라 검수만 병행합니다.\n\n실제 개발은 1단계가 끝난 뒤 1월부터 6~8주, 3월에 교관 앞에서 시연하는 것이 목표입니다. 자금은 K-방산 2단계, 신속시범사업, 국방부 신속상용화 세 갈래를 보고 있습니다.\n\n이상입니다. 질문 주시면 부록으로 답변드리겠습니다.",
+      "hotspots": [
+        {
+          "id": "6",
+          "label": "부록 6 참고",
+          "target": "seq-appF",
+          "region": {
+            "x": 6.375,
+            "y": 28.127,
+            "w": 1.188,
+            "h": 2.111
+          }
+        },
+        {
+          "id": "7",
+          "label": "부록 7 참고",
+          "target": "seq-appG",
+          "region": {
+            "x": 26.467,
+            "y": 43.38,
+            "w": 1.188,
+            "h": 2.111
+          }
+        },
+        {
+          "id": "10",
+          "label": "부록 10 참고",
+          "target": "seq-appJ",
+          "region": {
+            "x": 47.988,
+            "y": 86.991,
+            "w": 1.563,
+            "h": 2.111
+          }
+        }
+      ]
+    }
+  ],
+  "slideSequences": [
+    {
+      "id": "seq-appA",
+      "label": "부록 1. 용어·약어 사전",
+      "slides": [
+        {
+          "sceneId": "appA",
+          "notes": "질문 대응 메모\n\n약어 질문이 나오면 이 장을 띄웁니다. 본문 각 장 하단에도 그 장의 약어가 적혀 있습니다."
+        }
+      ]
+    },
+    {
+      "id": "seq-appB",
+      "label": "부록 2. 1단계 과제 요약",
+      "slides": [
+        {
+          "sceneId": "appB",
+          "notes": "질문 대응 메모\n\nQ. 1단계 일정에 영향은 없나? MVP 개발은 1단계 종료(12/31) 뒤 1월 착수라 겹치지 않습니다. 11~12월은 확인과 시나리오 작업만 합니다.\n\nQ. 1단계 서버를 그대로 쓰나? 입력 어댑터, STT·보정, 7필드, DB를 재사용합니다."
+        }
+      ]
+    },
+    {
+      "id": "seq-appC",
+      "label": "부록 3. 데이터 근거 상세",
+      "slides": [
+        {
+          "sceneId": "appC",
+          "notes": "질문 대응 메모\n\nQ. 항공 사례를 군 무전에 그대로 적용할 수 있나? 그래서 한국어 군사용어 연구를 맨 위에 뒀습니다. 같은 Whisper도 교범 데이터를 학습하자 문자 오류율이 13.68%에서 7.94%로 내려갔습니다."
+        }
+      ]
+    },
+    {
+      "id": "seq-appD",
+      "label": "부록 4. 군 음성 데이터 현황",
+      "slides": [
+        {
+          "sceneId": "appD",
+          "notes": "질문 대응 메모\n\nQ. 국방부가 데이터를 모으면 우리가 쓸 수 있지 않나? 국방AI데이터허브는 아직 사전 설계 단계의 구상입니다. 쓸 수 있게 되더라도, 교신 훈련 데이터처럼 정답이 붙은 군 음성은 우리가 만든 것이 차별점입니다."
+        }
+      ]
+    },
+    {
+      "id": "seq-appE",
+      "label": "부록 5. 국방 AI·예산 동향",
+      "slides": [
+        {
+          "sceneId": "appE",
+          "notes": "질문 대응 메모\n\nQ. 왜 지금인가? 2027년 정부안에서 AI·유무인 복합체계 예산이 4,968억 원에서 7,727억 원으로 늘었습니다. 반면 수출 수주는 2026년 7월 말 기준 약 80억 달러로 주춤합니다. 스타트업에게는 국내 AI 예산이 현실적인 기회입니다.\n\n2027년 수치는 국회 심의 전 정부안입니다."
+        }
+      ]
+    },
+    {
+      "id": "seq-appF",
+      "label": "부록 6. 시나리오 설계 틀(안)",
+      "slides": [
+        {
+          "sceneId": "appF",
+          "notes": "질문 대응 메모\n\nQ. 시나리오는 몇 개나 만들어야 하나? MVP는 3종으로 시작하고, 교관 인터뷰에서 자주 쓰는 교신 유형을 받아 늘립니다."
+        }
+      ]
+    },
+    {
+      "id": "seq-appG",
+      "label": "부록 7. 채점 기준(안)",
+      "slides": [
+        {
+          "sceneId": "appG",
+          "notes": "질문 대응 메모\n\nQ. 음성인식이 틀리면 채점도 틀리지 않나? 그래서 단어가 아니라 항목 단위로 대조하고, 확신이 낮으면 교관에게 넘깁니다. 항공관제 연구에서도 단어 단위 대조는 비효율적이었고 개념 단위 대조가 더 견고했습니다."
+        }
+      ]
+    },
+    {
+      "id": "seq-appH",
+      "label": "부록 8. 유사 사례",
+      "slides": [
+        {
+          "sceneId": "appH",
+          "notes": "질문 대응 메모\n\nQ. 해외 제품이 들어오면? 확인된 해외 사례는 모두 영어·항공 교신 중심입니다. 한국어 군 용어와 한국군 교신 절차, 내부망 설치가 진입 장벽이 되고, 저희는 1단계에서 군 용어 보정을 이미 만들고 있습니다."
+        }
+      ]
+    },
+    {
+      "id": "seq-appI",
+      "label": "부록 9. 무기체계 분류 근거",
+      "slides": [
+        {
+          "sceneId": "appI",
+          "notes": "질문 대응 메모\n\nQ. 교육용인데 무기체계로 인정되나? 훈령의 무기체계 세부분류에 전술훈련모의장비가 명시돼 있습니다. 다만 이 제품이 그 항목으로 분류될지는 신속원이 판단하므로 사전 문의가 첫 확인 항목입니다."
+        }
+      ]
+    },
+    {
+      "id": "seq-appJ",
+      "label": "부록 10. 지원사업 창구 상세",
+      "slides": [
+        {
+          "sceneId": "appJ",
+          "notes": "질문 대응 메모\n\nQ. 신속시범에 선정되면 우리가 개발하나? 공모문상 대상사업 선정 뒤 수행기관은 경쟁입찰 등 별도 절차로 뽑습니다.\n\nQ. 가장 빠른 자금은? K-방산 2단계(2027)입니다. 방향 변경 가능 여부가 첫 확인 항목입니다."
+        }
+      ]
+    },
+    {
+      "id": "seq-appK",
+      "label": "부록 11. 리스크 상세 대응표",
+      "slides": [
+        {
+          "sceneId": "appK",
+          "notes": "질문 대응 메모\n\nQ. 가장 큰 리스크는? 실제 수요입니다. 그래서 11월을 개발이 아닌 확인 기간으로 잡았고, 결과를 보고 개발 착수를 다시 결정하자고 제안드립니다."
+        }
+      ]
+    },
+    {
+      "id": "seq-appL",
+      "label": "부록 12. 확장 경로 상세",
+      "slides": [
+        {
+          "sceneId": "appL",
+          "notes": "질문 대응 메모\n\nQ. 원래 2단계 계획(보안형 의사결정 지원 서버)은 버리나? 버리지 않습니다. 실전 단계가 그 계획의 연장선이고, 교육장 데이터가 그 모델을 먼저 키워 줍니다. 2단계 신청 방향은 경북창경 확인 후 정합니다."
+        }
+      ]
+    },
+    {
+      "id": "seq-appM",
+      "label": "부록 13. 아이디어 선정 과정",
+      "slides": [
+        {
+          "sceneId": "appM",
+          "notes": "질문 대응 메모\n\nQ. 드론 탐지는 왜 안 하나? 대드론 예산은 크지만 하드웨어 개발이 필요하고 1단계 자산을 덜 씁니다. 신속시범 수요신청서만 내보는 저비용 베팅으로는 따로 검토할 수 있습니다."
+        }
+      ]
+    },
+    {
+      "id": "seq-appZ",
+      "label": "출처 전체",
+      "slides": [
+        {
+          "sceneId": "appZ",
+          "notes": "질문 대응 메모\n\n수치 출처 질문이 나오면 이 장을 띄웁니다. 링크를 누르면 원문이 열립니다."
+        }
+      ]
+    }
+  ]
+}
+</script>
+</hyperframes-slideshow>
+
+<script>
+(() => {
+  const show = document.getElementById('show');
+  /* ───── 시작 화면과 인트로 (ugv2 발표와 같은 흐름) ───── */
+  const startEl = document.getElementById('start'), intro = document.getElementById('intro');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let started = false, introOn = false, t0 = 0;
+  function playIntro() {
+    started = true; startEl.classList.add('out'); setTimeout(() => startEl.style.display = 'none', 500);
+    introOn = true; intro.style.display = 'block'; intro.classList.remove('out');
+    resizeCv(); startTitle(); resetFlow(); t0 = performance.now(); requestAnimationFrame(frame);
+  }
+  function closeIntro() {
+    introOn = false; intro.classList.add('out');
+    setTimeout(() => { if (!introOn) intro.style.display = 'none'; }, 950);
+    show.focus();
+  }
+  document.getElementById('play').onclick = playIntro;
+  intro.addEventListener('click', closeIntro);
+
+  const TITLE = ['AI 무전 교관', '데이터를 만드는 제품'], itt = document.getElementById('itt');
+  function startTitle() {
+    itt.innerHTML = TITLE.map(l => [...l].map(c => `<span>${c === ' ' ? '&nbsp;' : c}</span>`).join('')).join('<br>');
+    ['itg', 'isb'].forEach(id => document.getElementById(id).classList.remove('on'));
+    const sp = itt.querySelectorAll('span');
+    setTimeout(() => document.getElementById('itg').classList.add('on'), 300);
+    sp.forEach((s, i) => setTimeout(() => s.classList.add('on'), reduce ? 0 : 700 + i * 55));
+    setTimeout(() => document.getElementById('isb').classList.add('on'), reduce ? 0 : 900 + sp.length * 55);
+  }
+
+  // 왼쪽 위 로그: 무전 한 줄이 채점되기까지 (연출용 예시)
+  const icode = document.getElementById('icode');
+  const LINES = ["<span class='k'>$</span> a4ai-radio-coach run --scenario 정찰보고 --role 상황실",
+    "[INFO] tts     역할자=상황실  음질=무전기 대역  <span class='d'>합성 음성</span>",
+    "[INFO] input   교육생 헤드셋 ch1  16kHz mono",
+    "[INFO] stt     whisper  on-prem  lang=ko",
+    "norm   '일사 이공'          → <span class='k'>14:20</span>",
+    "norm   '찰리 호텔 일이삼사' → <span class='k'>CH 1234</span> …",
+    "field  시간    = 14:20", "field  좌표    = CH 1234 5678", "field  표적명  = 적 보병 분대", "field  상황    = 북쪽으로 이동 중",
+    "field  자산명  = <span class='k'>누락</span>",
+    "score  필수 항목 4/5   복창 OK",
+    "feedback → '자산 항목이 빠졌습니다'",
+    "save   음성 + 정답 + 판정 → 통화단위 DB",
+    "<span class='d'># 예시 출력: 연출용 로그이며 실제 측정값이 아님</span>"];
+  let li = 0;
+  function pushLine() { const d = document.createElement('div'); d.innerHTML = LINES[li++ % LINES.length]; icode.appendChild(d); if (icode.children.length > 40) icode.removeChild(icode.firstChild); }
+  for (let i = 0; i < 6; i++) pushLine();
+  setInterval(() => { if (introOn && !reduce) pushLine(); }, 420);
+
+  // 캔버스: 오른쪽에서 들어온 무전 파형이 STT 헤드를 지나며 7필드 태그로 바뀜
+  const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
+  let Wd = 0, Ht = 0; const DPR = Math.min(devicePixelRatio || 1, 2);
+  function resizeCv() { Wd = cv.clientWidth; Ht = cv.clientHeight; cv.width = Wd * DPR; cv.height = Ht * DPR; ctx.setTransform(DPR, 0, 0, DPR, 0, 0); }
+  addEventListener('resize', () => { if (introOn) resizeCv(); });
+  const BW = 7, SPEED = 140, PERIOD = 96, KEYS = [14, 32, 50, 66], SEG = 9;
+  const FIELDS = [['시간', '14:20'], ['좌표', 'CH 1234 5678'], ['표적명', '적 보병 분대'], ['상황', '북쪽으로 이동 중'], ['자산명', '누락']];
+  const mod = k => ((k % PERIOD) + PERIOD) % PERIOD;
+  const speech = k => { const m = mod(k); return m >= 8 && m < 80; };
+  const isField = k => { const m = mod(k); return KEYS.some(s => m >= s && m < s + SEG); };
+  let tags = [], lastK = null, utt = 0, lab = 0, fi = 0;
+  function resetFlow() { tags = []; lastK = null; utt = 0; lab = 0; fi = 0; }
+  const ease = p => 1 - Math.pow(1 - p, 3);
+  function frame(ms) {
+    const t = reduce ? 6 : Math.max(0, ms - t0) / 1000, W = Wd, H = Ht;
+    ctx.globalAlpha = 1; ctx.fillStyle = '#0d120e'; ctx.fillRect(0, 0, W, H);
+    ctx.strokeStyle = 'rgba(159,181,156,.07)'; ctx.lineWidth = 1; ctx.beginPath();
+    for (let x = 0; x < W; x += 64) { ctx.moveTo(x + .5, 0); ctx.lineTo(x + .5, H); }
+    for (let y = 0; y < H; y += 64) { ctx.moveTo(0, y + .5); ctx.lineTo(W, y + .5); }
+    ctx.stroke();
+    const cy = H * 0.42, amp = Math.min(H * 0.1, 88), headX = W * 0.6, off = t * SPEED;
+    const kMax = Math.floor(off / BW), kMin = kMax - Math.ceil(W / BW) - 2;
+    for (let k = kMin; k <= kMax; k++) {
+      const x = W - (off - k * BW), sp = speech(k), read = x < headX;
+      const a = sp ? 0.35 + 0.65 * Math.abs(Math.sin(k * 0.37) * Math.cos(k * 0.113)) : 0.05 + 0.05 * Math.abs(Math.sin(k * 1.7));
+      const h = Math.max(2, a * amp);
+      ctx.fillStyle = sp && isField(k) ? (read ? '#F2A900' : '#6d5a24') : sp ? (read ? '#7fa77a' : '#3d4a3f') : '#26302a';
+      ctx.globalAlpha = Math.max(0, Math.min(1, (x - W * 0.2) / (W * 0.16))); // 왼쪽 로그·제목 쪽으로 갈수록 흐리게
+      ctx.fillRect(x - 2, cy - h, 4, h * 2);
+    }
+    ctx.globalAlpha = 1;
+    ctx.strokeStyle = 'rgba(242,169,0,.85)'; ctx.setLineDash([5, 5]); ctx.beginPath();
+    ctx.moveTo(headX, cy - amp - 36); ctx.lineTo(headX, cy + amp + 36); ctx.stroke(); ctx.setLineDash([]);
+    ctx.font = '700 12px "JetBrains Mono", monospace'; ctx.fillStyle = '#F2A900'; ctx.fillText('STT', headX + 8, cy + amp + 32);
+    // 헤드를 지난 발화·필드 수 세기, 필드마다 태그 생성
+    const kHead = Math.floor((off - (W - headX)) / BW);
+    if (lastK === null) lastK = kHead;
+    for (let k = lastK + 1; k <= kHead; k++) {
+      const m = mod(k);
+      if (m === 8) utt++;
+      if (KEYS.includes(m)) { tags.push({ f: FIELDS[fi % FIELDS.length], lane: fi % 4, born: t }); fi++; lab++; }
+    }
+    lastK = kHead;
+    tags = tags.filter(g => t - g.born < 2.8);
+    tags.forEach(g => {
+      const p = (t - g.born) / 2.8, e = ease(Math.min(1, p / 0.7));
+      const miss = g.f[1] === '누락';
+      ctx.font = '600 15px "IBM Plex Sans KR", sans-serif'; const w1 = ctx.measureText(g.f[0]).width;
+      ctx.font = '500 15px "JetBrains Mono", "Nanum Gothic Coding", monospace'; const w2 = ctx.measureText(g.f[1]).width;
+      const w = w1 + w2 + 38;
+      const x = headX - 18 - w - e * 30, y = cy - amp - 50 - e * (16 + g.lane * 40); // STT 헤드 왼쪽 위로 쌓임
+      ctx.globalAlpha = p < 0.12 ? p / 0.12 : p > 0.78 ? (1 - p) / 0.22 : 1;
+      if (p < 0.35) { ctx.strokeStyle = 'rgba(242,169,0,.5)'; ctx.beginPath(); ctx.moveTo(headX, cy - amp); ctx.lineTo(x + w - 10, y + 15); ctx.stroke(); }
+      ctx.fillStyle = 'rgba(13,18,14,.9)'; ctx.strokeStyle = miss ? '#D06A55' : '#F2A900'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(x, y, w, 30, 4); else ctx.rect(x, y, w, 30); ctx.fill(); ctx.stroke();
+      ctx.font = '600 15px "IBM Plex Sans KR", sans-serif'; ctx.fillStyle = '#9fb59c'; ctx.fillText(g.f[0], x + 12, y + 20);
+      ctx.font = '500 15px "JetBrains Mono", "Nanum Gothic Coding", monospace'; ctx.fillStyle = miss ? '#E08A7A' : '#F3F5F1'; ctx.fillText(g.f[1], x + 24 + w1, y + 20);
+    });
+    ctx.globalAlpha = 1; ctx.lineWidth = 1;
+    const v = ctx.createRadialGradient(W * 0.56, H * 0.55, H * 0.25, W * 0.56, H * 0.55, H * 1.05);
+    v.addColorStop(0, 'rgba(13,18,14,0)'); v.addColorStop(1, 'rgba(13,18,14,.75)'); ctx.fillStyle = v; ctx.fillRect(0, 0, W, H);
+    document.getElementById('iutt').textContent = utt; document.getElementById('ilab').textContent = lab;
+    if (!reduce && intro.style.display !== 'none') requestAnimationFrame(frame);
+  }
+
+
+  // 시작 화면·인트로가 떠 있는 동안에는 키 입력을 슬라이드쇼보다 먼저 가로챔
+  window.addEventListener('keydown', e => {
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    if (!started) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopImmediatePropagation(); playIntro(); } else e.stopImmediatePropagation(); return; }
+    if (introOn) { e.preventDefault(); e.stopImmediatePropagation(); closeIntro(); }
+  }, true);
+  // 발표자 모드가 연 청중 탭에서는 시작 화면·인트로를 건너뜀
+  if (new URLSearchParams(location.search).get('mode') === 'audience') { started = true; startEl.style.display = 'none'; }
+})();
+</script>
+</body>
+</html>

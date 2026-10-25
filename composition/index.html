@@ -1,0 +1,1654 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920, height=1080">
+<title>AI 무전 교관 (컴포지션)</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+@font-face{font-family:'IBM Plex Sans KR';font-weight:300;font-style:normal;font-display:block;src:url(fonts/plex-300.woff2) format('woff2')}
+@font-face{font-family:'IBM Plex Sans KR';font-weight:400;font-style:normal;font-display:block;src:url(fonts/plex-400.woff2) format('woff2')}
+@font-face{font-family:'IBM Plex Sans KR';font-weight:500;font-style:normal;font-display:block;src:url(fonts/plex-500.woff2) format('woff2')}
+@font-face{font-family:'IBM Plex Sans KR';font-weight:600;font-style:normal;font-display:block;src:url(fonts/plex-600.woff2) format('woff2')}
+@font-face{font-family:'IBM Plex Sans KR';font-weight:700;font-style:normal;font-display:block;src:url(fonts/plex-700.woff2) format('woff2')}
+@font-face{font-family:'Nanum Gothic Coding';font-weight:400;font-style:normal;font-display:block;src:url(fonts/nanumcoding-400.woff2) format('woff2')}
+@font-face{font-family:'Nanum Gothic Coding';font-weight:700;font-style:normal;font-display:block;src:url(fonts/nanumcoding-700.woff2) format('woff2')}
+
+:root{
+  --paper:#ECEEE8;      /* 교범 종이: 차가운 회녹색 */
+  --paper-2:#E1E5DA;
+  --ink:#1D2A24;        /* 올리브 잉크 */
+  --muted:#5C6860;
+  --olive:#4E5D3C;      /* 구조선, 1단계 재사용 */
+  --olive-ink:#F1F3EC;
+  --signal:#F2A900;     /* 무전기 표시창 앰버: 데이터 하이라이트 전용 */
+  --signal-soft:#FBE3A6;
+  --brick:#A8432F;      /* 가안·누락 표시 */
+  --line:#C7CDBE;
+  --shell:#252C28;
+  --bar-1:#8FA85A;      /* 차트: 기준·이전 (검증 통과 서열 팔레트) */
+  --bar-2:#46621A;      /* 차트: 개선·이후 */
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:#252C28;color:var(--ink);font-family:'IBM Plex Sans KR', sans-serif;-webkit-font-smoothing:antialiased;word-break:keep-all;overflow-wrap:break-word}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--signal);outline-offset:2px}
+
+/* ---------- 슬라이드 공통 ---------- */
+.slide{position:relative;width:1600px;height:900px;background:var(--paper);padding:60px 96px 0;display:flex;flex-direction:column;overflow:hidden}
+.slide .notes{display:none}
+.slide .top{display:flex;justify-content:space-between;align-items:baseline;font-size:18px;color:var(--muted);margin-bottom:22px;min-height:24px}
+.slide .back{font:inherit;font-size:16px;color:var(--olive);background:none;border:1.5px solid var(--olive);border-radius:4px;padding:3px 12px;cursor:pointer}
+.slide .back:hover{background:var(--olive);color:var(--olive-ink)}
+.slide h1.t{font-size:50px;font-weight:600;letter-spacing:-0.025em;line-height:1.28;margin:0 0 14px;max-width:1300px;text-wrap:balance}
+.slide .sub{font-size:24px;color:var(--muted);line-height:1.55;margin:0 0 30px;max-width:1180px}
+.slide .body{flex:1;min-height:0;display:flex;flex-direction:column}
+/* 하단: 약어 + 쪽번호 / 출처 */
+.slide .foot{margin-top:auto;border-top:1px solid var(--line);padding:11px 0 16px;display:grid;grid-template-columns:1fr auto;gap:5px 32px;font-size:14.5px;color:var(--muted);line-height:1.45}
+.slide .abbr{display:flex;flex-wrap:wrap;gap:2px 26px}
+.slide .abbr b{color:var(--ink);font-weight:600;margin-right:6px}
+.slide .pg{white-space:nowrap;font-variant-numeric:tabular-nums}
+.slide .cites{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:2px 22px;font-size:13.5px}
+.slide .cites::before{content:'출처';font-weight:600;color:var(--ink);margin-right:-12px}
+.slide .cites span b{color:var(--olive);margin-right:5px}
+sup.c{font-size:.5em;font-weight:600;color:var(--olive);margin-left:3px;vertical-align:.9em;line-height:0}
+/* 부록 참조: 작은 번호 배지, 마우스를 올리면 '부록 N 참고' */
+.ref{display:inline-flex;align-items:center;justify-content:center;min-width:19px;height:19px;padding:0 5px;margin-left:6px;border-radius:10px;background:var(--olive);color:var(--olive-ink);font-family:'IBM Plex Sans KR', sans-serif;font-size:12.5px;font-weight:600;letter-spacing:0;line-height:1;text-decoration:none;vertical-align:.5em;position:relative;white-space:nowrap}
+.ref::after{content:attr(data-tip);position:absolute;left:50%;bottom:calc(100% + 7px);transform:translateX(-50%);background:var(--ink);color:var(--olive-ink);font-size:15px;font-weight:500;padding:6px 10px;border-radius:4px;opacity:0;pointer-events:none;z-index:5}
+.ref:hover::after,.ref:focus-visible::after{opacity:1}
+.ref:hover{background:var(--ink)}
+/* 목차 */
+.toc{display:grid;grid-template-columns:repeat(4,1fr);gap:28px;margin-top:6px}
+.toc a{display:block;color:inherit;text-decoration:none}
+.toc .photo{height:330px}
+.toc .n{display:block;font-family:'Nanum Gothic Coding', ui-monospace, Consolas, monospace;font-size:20px;color:var(--muted);margin-top:16px}
+.toc h2{font-size:29px;font-weight:600;letter-spacing:-0.015em;margin:4px 0 8px}
+.toc p{font-size:19px;color:var(--muted);line-height:1.5;margin:0}
+.toc a:hover h2,.toc a:focus-visible h2{text-decoration:underline;text-decoration-color:var(--signal);text-decoration-thickness:3px;text-underline-offset:6px}
+.toc-app{margin:auto 0 18px;font-size:19px;color:var(--muted)}
+.toc-app a{color:var(--olive);font-weight:600}
+.flag{display:inline-block;font-size:16px;font-weight:600;color:var(--brick);border:1.5px solid var(--brick);border-radius:4px;padding:1px 9px;vertical-align:4px;margin-left:10px;white-space:nowrap}
+.take{font-size:30px;font-weight:600;letter-spacing:-0.015em;margin:auto 0 26px;padding-top:16px;border-top:2px solid var(--ink);line-height:1.4}
+.muted{color:var(--muted)}
+.photo{display:block;width:100%;object-fit:cover;border-radius:4px;background:var(--paper-2)}
+.cap{font-size:14px;color:var(--muted);margin-top:6px}
+
+/* ---------- 전사문 (시그니처) ---------- */
+.tx{font-family:'Nanum Gothic Coding', ui-monospace, Consolas, monospace;font-size:25px;line-height:2.5;color:var(--ink)}
+.tx .who{color:var(--muted);margin-right:14px}
+.hl{background:#F8D98A;padding:3px 6px;border-radius:3px;position:relative;white-space:nowrap}
+.hl::after{content:attr(data-f);position:absolute;left:6px;top:100%;margin-top:3px;font-family:'IBM Plex Sans KR', sans-serif;font-size:15px;font-weight:500;color:var(--olive);white-space:nowrap;line-height:1.2}
+.miss{color:var(--brick);font-weight:700}
+.ok{color:var(--olive);font-weight:700}
+
+/* ---------- 표지 ---------- */
+.cover{padding-top:72px}
+.cover .head{display:grid;grid-template-columns:1fr 640px;gap:48px;align-items:start}
+.cover .ttl{font-size:132px;font-weight:600;letter-spacing:-0.04em;line-height:1;margin:18px 0 0}
+.cover .ttl2{font-size:54px;font-weight:300;letter-spacing:-0.02em;margin:22px 0 0}
+.cover .lede{font-size:24px;color:var(--muted);margin:18px 0 0}
+.cover .photo{height:360px}
+.cover .wave{display:block;margin:34px 0 4px;width:1408px;height:60px}
+.cover .tx{font-size:22px}
+.cover .hl::after{font-size:17px}
+.cover figure{position:relative;margin:0}
+.cover .meta{margin-top:auto;padding:14px 0 20px;border-top:1px solid var(--line);display:flex;gap:56px;font-size:17px;color:var(--muted)}
+@media (prefers-reduced-motion:no-preference){
+  .is-active .cover .hl{animation:hl-in .55s ease-out both;animation-delay:var(--d,0s)}
+  @keyframes hl-in{from{background-color:transparent}to{}}
+}
+
+/* ---------- 레이아웃 조각 ---------- */
+.cols{display:grid;gap:56px}
+.c2{grid-template-columns:1fr 1fr}
+.c3{grid-template-columns:repeat(3,1fr)}
+.c64{grid-template-columns:1.45fr 1fr}
+.pts{display:grid;gap:38px;align-content:start}
+.pt b{display:block;font-size:32px;font-weight:600;letter-spacing:-0.015em;margin-bottom:8px;line-height:1.35}
+.pt span{display:block;font-size:24px;color:var(--muted);line-height:1.6}
+.decide{border:2px solid var(--ink);border-radius:6px;padding:30px 34px;align-self:start}
+.decide h2{font-size:25px;font-weight:600;margin:0 0 16px}
+.decide ol{margin:0;padding-left:28px;font-size:24px;line-height:1.8}
+.chain{display:flex;flex-wrap:wrap;gap:10px 8px;align-items:center;font-size:20px}
+.chain span{background:var(--olive);color:var(--olive-ink);border-radius:4px;padding:8px 14px}
+.chain i{font-style:normal;color:var(--muted)}
+.assets{list-style:none;margin:0;padding:0;display:grid;gap:16px;font-size:22px;line-height:1.5}
+.assets li{padding-top:12px;border-top:1px solid var(--line)}
+.assets b{font-weight:600}
+
+/* 차트 */
+.chart{position:relative}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.chart .bar{cursor:default;outline:none}
+.chart .bar:focus-visible path{stroke:var(--signal);stroke-width:3}
+.chart .tip{position:absolute;pointer-events:none;transform:translate(10px,-50%);background:var(--ink);color:var(--olive-ink);font-size:16px;line-height:1.4;padding:7px 11px;border-radius:4px;white-space:nowrap;opacity:0}
+.chart .tip.on{opacity:1}
+.chart-title{font-size:21px;font-weight:600;margin:0 0 4px}
+.chart-sub{font-size:16px;color:var(--muted);margin:0 0 10px}
+.lgd{display:flex;gap:22px;font-size:16px;margin:0 0 8px;color:var(--ink)}
+.lgd i{display:inline-block;width:16px;height:16px;border-radius:3px;vertical-align:-3px;margin-right:7px}
+.tiles{display:grid;gap:16px;align-content:start}
+.tile{border-top:2px solid var(--ink);padding-top:12px}
+.tile .k{font-size:17px;color:var(--muted);line-height:1.45}
+.tile .v{font-size:40px;font-weight:600;letter-spacing:-0.02em;margin:6px 0 2px;font-variant-numeric:tabular-nums}
+.tile .v small{font-size:22px;font-weight:400;color:var(--muted)}
+
+/* 막힌 길 */
+.blocks{display:grid;grid-template-columns:1fr 1fr;gap:34px 56px}
+.blk h2{font-size:30px;font-weight:600;margin:0 0 10px}
+.blk p{font-size:23px;line-height:1.6;color:var(--muted);margin:0}
+.blk{padding:18px 0 0;border-top:2px solid var(--ink)}
+
+/* 조건 3개 */
+.conds .cond{padding-top:22px;border-top:2px solid var(--ink)}
+.conds h2{font-size:34px;font-weight:600;margin:0 0 14px;letter-spacing:-0.015em}
+.conds p{font-size:25px;line-height:1.6;color:var(--muted);margin:0}
+
+/* 컨셉도 */
+.node{border:2px solid var(--ink);border-radius:6px;padding:20px 24px;background:var(--paper)}
+.node h2{font-size:28px;font-weight:600;margin:0 0 6px}
+.node p{font-size:21px;color:var(--muted);margin:0;line-height:1.5}
+.node.ai{border-color:var(--olive);background:var(--olive);color:var(--olive-ink)}
+.node.ai p{color:#D3DAC8}
+.pair{display:grid;grid-template-columns:1fr 64px 1fr;align-items:center}
+.vlink{height:54px;margin-left:36px;border-left:2px solid var(--ink);padding-left:14px;display:flex;align-items:center;font-size:17px;color:var(--muted)}
+.card{background:#F6F7F3;border:1px solid var(--line);border-radius:6px;padding:26px 30px}
+.card .tx{font-size:21px;line-height:1.8}
+.card .tx .hl::after{display:none}
+.card h2{font-size:20px;font-weight:600;color:var(--muted);margin:0 0 12px}
+.score{font-family:'IBM Plex Sans KR', sans-serif;font-size:21px;margin-top:14px;padding-top:14px;border-top:1px dashed var(--line);line-height:1.7}
+
+/* 파이프라인 */
+.flow{display:grid;grid-template-columns:repeat(7,1fr);gap:10px}
+.step{border-radius:6px;padding:20px 16px;min-height:340px;display:flex;flex-direction:column;gap:10px}
+.step .n{font-family:'Nanum Gothic Coding', ui-monospace, Consolas, monospace;font-size:22px}
+.step h2{font-size:26px;font-weight:600;margin:0;line-height:1.3}
+.step p{font-size:20px;line-height:1.5;margin:0}
+.step .tg{margin-top:auto;font-size:17px;font-weight:600}
+.step.reuse{background:var(--olive);color:var(--olive-ink)}
+.step.reuse p{color:#D3DAC8}
+.step.new{background:var(--signal-soft);border:2px solid var(--signal)}
+.step.new p{color:#5B4710}
+.legend{display:flex;gap:32px;font-size:21px;margin:22px 0 0;align-items:center}
+.legend i{display:inline-block;width:22px;height:22px;border-radius:4px;vertical-align:-5px;margin-right:8px}
+.legend .r{background:var(--olive)}
+.legend .w{background:var(--signal-soft);border:2px solid var(--signal)}
+
+/* 플라이휠 */
+.wheel{position:relative;width:700px;height:480px;flex:none}
+.wheel svg{position:absolute;inset:0}
+.wheel .lb{position:absolute;transform:translate(-50%,-50%);background:var(--paper);padding:6px 12px;font-size:21px;font-weight:600;white-space:nowrap}
+.compare h2{font-size:28px;font-weight:600;margin:0 0 10px}
+.compare p{font-size:23px;line-height:1.6;color:var(--muted);margin:0 0 6px}
+.compare .row{padding:18px 0;border-top:2px solid var(--ink)}
+.compare .row.ours h2{background:linear-gradient(transparent 70%,var(--signal-soft) 70%);display:inline}
+
+/* 체크 행 */
+.checks{display:grid;gap:0}
+.chk{display:grid;grid-template-columns:380px 1fr;gap:36px;padding:22px 0;border-top:1px solid var(--line)}
+.chk:first-child{border-top:2px solid var(--ink)}
+.chk h2{font-size:28px;font-weight:600;margin:0;line-height:1.4}
+.chk p{font-size:23px;line-height:1.6;margin:0}
+.chk p strong{font-weight:600}
+
+/* 표 */
+.tbl{width:100%;border-collapse:collapse;font-size:23px;line-height:1.5}
+.tbl th{text-align:left;font-weight:600;font-size:18px;color:var(--muted);border-bottom:2px solid var(--ink);padding:10px 20px 10px 0}
+.tbl td{border-bottom:1px solid var(--line);padding:20px 20px 20px 0;vertical-align:top}
+.tbl td:first-child{font-weight:600}
+.tbl.sm{font-size:18px}
+.tbl.sm th{font-size:15px}
+.tbl.sm td{padding:11px 16px 11px 0}
+.tbl.xs{font-size:16.5px;line-height:1.45}
+.tbl.xs th{font-size:14.5px}
+.tbl.xs td{padding:9px 14px 9px 0}
+.tbl .dots{font-family:'IBM Plex Sans KR', sans-serif;letter-spacing:2px;white-space:nowrap}
+
+/* 확장 경로 */
+.stages{display:grid;grid-template-columns:1fr 56px 1fr 56px 1fr;align-items:stretch}
+.stg .photo{height:150px;margin-bottom:14px}
+.stg .bar-top{border-top:2px solid var(--olive);padding-top:12px}
+.stg.first .bar-top{border-top-color:var(--signal)}
+.stg .nn{font-family:'Nanum Gothic Coding', ui-monospace, Consolas, monospace;font-size:20px;color:var(--muted)}
+.stg h2{font-size:34px;font-weight:600;margin:2px 0 2px}
+.stg .prod{font-size:23px;font-weight:500;margin:0 0 6px}
+.stg dl{margin:0;font-size:19px;line-height:1.45}
+.stg dt{color:var(--muted);font-size:15px;margin-top:9px}
+.stg dd{margin:0}
+.arr{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-size:14px;color:var(--muted);text-align:center}
+
+/* 타임라인 */
+.tl{display:grid;grid-template-columns:150px 1fr;font-size:22px;line-height:1.55}
+.tl div{padding:16px 0;border-top:1px solid var(--line)}
+.tl .d{font-weight:600;font-variant-numeric:tabular-nums}
+.mvp{list-style:none;margin:0;padding:0;font-size:23px;line-height:1.55;display:grid;gap:18px}
+.mvp li{padding-top:14px;border-top:1px solid var(--line)}
+.mvp b{font-weight:600}
+
+/* 결정 */
+.dec{display:grid;grid-template-columns:56px 1fr 1.25fr;gap:0 28px}
+.dec > div{padding:24px 0;border-top:1px solid var(--line);font-size:23px;line-height:1.55}
+.dec .h{font-size:18px;color:var(--muted);border-top:none;padding:0 0 10px;border-bottom:2px solid var(--ink)}
+.dec .no{font-family:'Nanum Gothic Coding', ui-monospace, Consolas, monospace;font-size:30px;font-weight:700}
+.dec .what{font-weight:600;font-size:27px}
+
+/* ---------- 부록 ---------- */
+.app-sl{padding-right:150px}
+.tabs{position:absolute;right:0;top:60px;bottom:60px;width:58px;display:flex;flex-direction:column;gap:4px}
+.tabs a{flex:1;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;text-decoration:none;color:var(--muted);background:var(--paper-2);border-radius:5px 0 0 5px}
+.tabs a:hover{color:var(--ink)}
+.tabs a.on{background:var(--olive);color:var(--olive-ink)}
+.app-sl h1.t{font-size:38px;margin-bottom:8px}
+.app-sl .sub{font-size:19px;margin-bottom:18px}
+.gloss{columns:4;column-gap:34px;font-size:15px;line-height:1.42}
+.gloss div{break-inside:avoid;margin:0 0 10px}
+.gloss b{display:block;font-weight:600;font-size:16px}
+.gloss span{color:var(--muted)}
+.box{border:1px solid var(--line);border-radius:6px;padding:14px 18px;background:#F4F5F1}
+.box h2{font-size:19px;font-weight:600;margin:0 0 8px}
+.box p,.box li{font-size:17.5px;line-height:1.55;margin:0}
+.box ul,.box ol{margin:0;padding-left:20px}
+.note{font-size:15.5px;color:var(--muted);line-height:1.55;margin-top:12px}
+#appB .box{padding:11px 16px}
+#appB .box h2{font-size:17px;margin-bottom:5px}
+#appB .box p,#appB .box li{font-size:15.5px;line-height:1.48}
+#appB .tbl.xs{font-size:15.5px}
+#appB .tbl.xs td{padding:7px 12px 7px 0}
+.quote{font-size:17px;line-height:1.6;background:var(--paper-2);border-radius:4px;padding:10px 14px;margin:0}
+.src{columns:2;column-gap:44px;font-size:13.5px;line-height:1.45}
+.src h2{font-size:14.5px;font-weight:600;margin:0 0 5px;break-after:avoid}
+.src ul{margin:0 0 12px;padding-left:18px}
+.src li{margin-bottom:3px;break-inside:avoid}
+.src a{color:var(--olive);word-break:break-all}
+
+
+
+/* ---------- 슬라이드쇼 장면 ---------- */
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#ECEEE8}
+#root{position:relative;width:100%;height:100%;overflow:hidden}
+.scene-frame{position:absolute;top:0;left:0;width:1920px;height:1080px;overflow:hidden;opacity:0;visibility:hidden;pointer-events:none;background:#ECEEE8}
+.scale-box{width:1600px;height:900px;transform:scale(1.2);transform-origin:0 0}
+.scale-box .slide{display:flex}
+.app-sl{padding-right:96px}
+/* 부록 참조 배지: 자리만 남김. 보이는 배지는 슬라이드쇼 핫스팟이 같은 자리에 그린다 */
+.ref{visibility:hidden}
+.toc-card{display:block;color:inherit}
+.back-hint{font-size:16px;color:var(--olive)}
+.top-app{justify-content:flex-end}
+::selection{background:#FBE3A6;color:#1D2A24}
+
+</style>
+</head>
+<body>
+<script type="application/hyperframes-slideshow+json">
+{
+  "slides": [
+    {
+      "sceneId": "s0",
+      "notes": "안녕하십니까. 오늘은 K-방산 2차 아이디어로 AI 무전 교관을 제안드리겠습니다.\n\n한 줄로 말씀드리면, 1단계에서 만들고 있는 전장 음성 엔진으로 쓰일수록 데이터가 쌓이는 제품을 만들자는 이야기입니다. 화면의 무전 한 줄이 노란 표시처럼 시간, 좌표, 표적, 상황으로 나뉘는 것, 이것이 저희 기술의 핵심입니다.\n\n참고로 오른쪽 사진은 AI로 생성한 이미지입니다."
+    },
+    {
+      "sceneId": "toc",
+      "notes": "오늘은 네 부분으로 말씀드리겠습니다.\n\n먼저 저희가 지금 가진 자산을 보고, 이어서 오늘 가장 강조하고 싶은 데이터 이야기를 드리겠습니다. 그다음 AI 무전 교관이 무엇이고 어떻게 동작하는지, 마지막으로 어디까지 확장하고 어떻게 시작할지 말씀드리겠습니다.\n\n세부 근거는 부록 1부터 13까지에 모아 두었습니다.",
+      "hotspots": [
+        {
+          "id": "1",
+          "label": "부록 1 참고",
+          "target": "seq-appA",
+          "region": {
+            "x": 8.494,
+            "y": 89.498,
+            "w": 1.188,
+            "h": 2.111
+          }
+        },
+        {
+          "id": "2",
+          "label": "부록 2 참고",
+          "target": "seq-appB",
+          "region": {
+            "x": 10.057,
+            "y": 89.498,
+            "w": 1.188,
+            "h": 2.111
+          }
+        },
+        {
+          "id": "3",
+          "label": "부록 3 참고",
+          "target": "seq-appC",
+          "region": {
+            "x": 11.619,
+            "y": 89.498,
+            "w": 1.188,
+            "h": 2.111
+          }
+        },
+        {
+          "id": "4",
+          "label": "부록 4 참고",
+          "target": "seq-appD",
+          "region": {
+            "x": 13.182,
+            "y": 89.498,
+            "w": 1.188,
+            "h": 2.111
+          }
+        },
+        {
+          "id": "5",
+          "label": "부록 5 참고",
+          "target": "seq-appE",
+          "region": {
+            "x": 14.744,
+            "y": 89.498,
+            "w": 1.187,
+            "h": 2.111
+          }
+        },
+        {
+          "id": "6",
+          "label": "부록 6 참고",
+          "target": "seq-appF",
+          "region": {
+            "x": 16.307,
+            "y": 89.498,
+            "w": 1.187,
+            "h": 2.111
+          }
+        },
+        {
+          "id": "7",
+          "label": "부록 7 참고",
+          "target": "seq-appG",
+          "region": {
+            "x": 17.869,
+            "y": 89.498,
+            "w": 1.187,
+            "h": 2.111
+          }
+        },
+        {
+          "id": "8",
+          "label": "부록 8 참고",
+          "target": "seq-appH",
+          "region": {
+            "x": 19.432,
+            "y": 89.498,
+            "w": 1.187,
+            "h": 2.111
+          }
+        },
+        {
+          "id": "9",
+          "label": "부록 9 참고",
+          "target": "seq-appI",
+          "region": {
+            "x": 20.994,
+            "y": 89.498,
+            "w": 1.187,
+            "h": 2.111
+          }
+        },
+        {
+          "id": "10",
+          "label": "부록 10 참고",
+          "target": "seq-appJ",
+          "region": {
+            "x": 22.557,
+            "y": 89.498,
+            "w": 1.563,
+            "h": 2.111
+          }
+        },
+        {
+          "id": "11",
+          "label": "부록 11 참고",
+          "target": "seq-appK",
+          "region": {
+            "x": 24.494,
+            "y": 89.498,
+            "w": 1.563,
+            "h": 2.111
+          }
+        },
+        {
+          "id": "12",
+          "label": "부록 12 참고",
+          "target": "seq-appL",
+          "region": {
+            "x": 26.432,
+            "y": 89.498,
+            "w": 1.563,
+            "h": 2.111
+          }
+        },
+        {
+          "id": "13",
+          "label": "부록 13 참고",
+          "target": "seq-appM",
+          "region": {
+            "x": 28.369,
+            "y": 89.498,
+            "w": 1.563,
+            "h": 2.111
+          }
+        },
+        {
+          "id": "출처",
+          "label": "출처 참고",
+          "target": "seq-appZ",
+          "region": {
+            "x": 30.307,
+            "y": 89.498,
+            "w": 2.02,
+            "h": 2.111
+          }
+        }
+      ]
+    },
+    {
+      "sceneId": "s2",
+      "notes": "저희가 어디에 서 있는지부터 보겠습니다.\n\n1단계 과제에서 저희는 교환기 스위치에서 음성을 받아 텍스트로 바꾸고, 군 용어와 숫자, 좌표를 보정하고, 시간·좌표·명령 같은 7개 필드로 정리한 뒤, 사람이 승인한 결과를 저장하는 서버를 만들고 있습니다.\n\n여기에 GCS Saker 관제 화면, 무전기 소음감쇄 칩 과제, 지휘관 의사결정 지원 SW가 있습니다. 그리고 과제책임자가 통신장교 출신입니다.\n\n오늘 제안은 이 자산들을 거의 그대로 쓰는 쪽으로 설계했습니다.",
+      "hotspots": [
+        {
+          "id": "2",
+          "label": "부록 2 참고",
+          "target": "seq-appB",
+          "region": {
+            "x": 26.874,
+            "y": 17.611,
+            "w": 1.187,
+            "h": 2.111
+          }
+        }
+      ]
+    },
+    {
+      "sceneId": "s3",
+      "notes": "두 번째 파트는 데이터입니다. 오늘 발표에서 가장 강조하고 싶은 부분입니다.\n\n왼쪽은 국방대학교 연구입니다. 같은 Whisper 모델에 어떤 군 데이터를 학습시켰느냐에 따라 문자 오류율이 13.68%에서 7.94%까지 달라졌습니다. 용어사전만 학습하면 거의 그대로였고, 전술 개념이 담긴 교범을 학습했을 때 가장 정확했습니다.\n\n해외도 마찬가지입니다. 항공 무선 교신에서 시판 음성인식의 단어 오류율은 80%였는데, 그 분야 데이터로 맞춤화하자 15% 미만이 됐습니다. 싱가포르 관제 훈련 연구에서도 최대 107.8%가 23.45%로 내려갔습니다.\n\n모델은 누구나 가져다 쓸 수 있습니다. 차이를 만드는 건 그 분야 데이터입니다.",
+      "hotspots": [
+        {
+          "id": "3",
+          "label": "부록 3 참고",
+          "target": "seq-appC",
+          "region": {
+            "x": 38.352,
+            "y": 23.5,
+            "w": 1.187,
+            "h": 2.111
+          }
+        },
+        {
+          "id": "2",
+          "label": "부록 2 참고",
+          "target": "seq-appB",
+          "region": {
+            "x": 88.166,
+            "y": 60.856,
+            "w": 1.187,
+            "h": 2.111
+          }
+        }
+      ]
+    },
+    {
+      "sceneId": "s4",
+      "notes": "그런데 그 군 음성 데이터는 어디서 왔을까요. 모두 직접 만들어 썼습니다.\n\n저희 1단계도 승인받은 파일과 모의 시험망으로 시험하고 있고, 실제 운용망 연동은 후속 단계로 남겨 두었습니다. 음성 데이터는 민감정보로 반출을 통제합니다.\n\n앞 장의 국방대 연구도 현역 장교 열 명이 교범과 용어사전을 직접 읽어 녹음한 음성으로 학습했습니다. KCTC는 영상과 음성이 흩어져 있고 정제할 도구가 없다고 스스로 진단했습니다.\n\n저희 VCM 과제에서도 외부 음원은 이용 조건 확인이 어려워 라이선스가 명확한 음원을 따로 확보해 썼습니다.",
+      "hotspots": [
+        {
+          "id": "4",
+          "label": "부록 4 참고",
+          "target": "seq-appD",
+          "region": {
+            "x": 13.508,
+            "y": 20.167,
+            "w": 1.188,
+            "h": 2.111
+          }
+        },
+        {
+          "id": "3",
+          "label": "부록 3 참고",
+          "target": "seq-appC",
+          "region": {
+            "x": 62.603,
+            "y": 20.167,
+            "w": 1.188,
+            "h": 2.111
+          }
+        },
+        {
+          "id": "4 ",
+          "label": "부록 4 참고",
+          "target": "seq-appD",
+          "region": {
+            "x": 16.853,
+            "y": 44.543,
+            "w": 1.188,
+            "h": 2.111
+          }
+        }
+      ]
+    },
+    {
+      "sceneId": "s5",
+      "notes": "그래서 생각을 뒤집었습니다. 데이터를 구하러 다니는 대신, 쓰일수록 정답 데이터가 생기는 제품을 만들자는 것입니다.\n\n그런 제품은 세 가지 조건을 갖춰야 한다고 봤습니다. 정답이 미리 정해져 있어야 하고, 반복해서 쓰여야 하고, 운용망 밖에서 돌아야 합니다.\n\n이 세 조건에 맞춰 고른 것이 무전 교신 훈련입니다."
+    },
+    {
+      "sceneId": "s6",
+      "notes": "이제 AI 무전 교관입니다. 먼저 이 제품이 놓일 흐름입니다.\n\nKCTC는 훈련 분석이 분석관의 경험과 직관에 상당 부분 기대고 있어 시간과 인력이 많이 든다고 스스로 진단했습니다. 그래서 육군은 훈련 시나리오 자동 생성, 난이도 자동 조정, 훈련 중 평가와 피드백, 훈련 직후 사후검토를 연구할 예정입니다.\n\n해외에서는 캐나다군이 화력 요청 무전 절차를 음성인식과 VR로 훈련하는 연구를 했습니다.\n\nAI 무전 교관은 이 흐름을 무전 교신 훈련에 먼저 적용하는 제품입니다. 다만 현장 교관의 실제 수요는 아직 직접 확인하지 않았고, 11월에 인터뷰로 확인하겠습니다.",
+      "hotspots": [
+        {
+          "id": "11",
+          "label": "부록 11 참고",
+          "target": "seq-appK",
+          "region": {
+            "x": 61.572,
+            "y": 36.266,
+            "w": 1.563,
+            "h": 2.111
+          }
+        }
+      ]
+    },
+    {
+      "sceneId": "s7",
+      "notes": "제품은 단순합니다. AI가 상황실이나 사격지휘소 같은 상대 무전병 역할을 음성으로 맡습니다. 교육생은 절차대로 보고하고 복창합니다.\n\n시스템은 그 교신을 받아 적고, 빠진 항목, 틀린 숫자와 좌표, 절차, 응답 시간을 바로 채점합니다. 오른쪽은 가상 화면 예시인데, 시나리오가 요구한 항목이 빠지면 그 자리에서 알려줍니다.\n\n결과는 GCS Saker 기반 교관 콘솔에 모입니다. 교관은 교육생별 점수와 반복되는 실수를 보고 녹음을 다시 들어볼 수 있습니다.",
+      "hotspots": [
+        {
+          "id": "7",
+          "label": "부록 7 참고",
+          "target": "seq-appG",
+          "region": {
+            "x": 27.438,
+            "y": 47.5,
+            "w": 1.187,
+            "h": 2.111
+          }
+        },
+        {
+          "id": "6",
+          "label": "부록 6 참고",
+          "target": "seq-appF",
+          "region": {
+            "x": 61.936,
+            "y": 19.5,
+            "w": 1.187,
+            "h": 2.111
+          }
+        }
+      ]
+    },
+    {
+      "sceneId": "s8",
+      "notes": "동작 방식입니다. 일곱 단계 중 진한 초록색 네 단계는 1단계 엔진을 그대로 씁니다.\n\n새로 만드는 건 노란색 세 가지입니다. 교범을 바탕으로 정답이 들어간 시나리오, 그 시나리오를 무전기 음질로 읽어 주는 AI 역할자, 그리고 정답과 대조하는 채점기입니다.\n\n음성 수신, 음성인식과 군 용어 보정, 7필드 추출, 저장은 1단계에서 이미 만들고 있습니다. 인터넷 없이 내부망에서 돌아가는 구조도 1단계와 같습니다.",
+      "hotspots": [
+        {
+          "id": "2",
+          "label": "부록 2 참고",
+          "target": "seq-appB",
+          "region": {
+            "x": 61.573,
+            "y": 63.944,
+            "w": 1.188,
+            "h": 2.111
+          }
+        },
+        {
+          "id": "7",
+          "label": "부록 7 참고",
+          "target": "seq-appG",
+          "region": {
+            "x": 68.187,
+            "y": 63.944,
+            "w": 1.188,
+            "h": 2.111
+          }
+        }
+      ]
+    },
+    {
+      "sceneId": "s9",
+      "notes": "이 장이 앞에서 말씀드린 데이터 문제에 대한 답입니다.\n\n보통 음성 데이터는 녹음을 모으고, 사람이 듣고 받아 적고, 검수해야 만들어집니다. 앞 장처럼 군 음성은 녹음부터 직접 만들어야 했습니다.\n\nAI 무전 교관은 다릅니다. 시나리오를 저희가 쓰기 때문에 정답이 이미 있습니다. 교육생이 말하는 순간 정답이 붙은 군 음성이 한 건 저장됩니다.\n\n교육을 많이 할수록 데이터가 늘고, 인식과 채점이 정확해지고, 그래서 더 많이 쓰이는 선순환이 됩니다. 1단계 신청서에도 저장한 데이터를 2단계 학습에 쓰는 계획이 있어, 이 데이터가 그대로 재료가 됩니다.",
+      "hotspots": [
+        {
+          "id": "12",
+          "label": "부록 12 참고",
+          "target": "seq-appL",
+          "region": {
+            "x": 16.297,
+            "y": 65.054,
+            "w": 1.563,
+            "h": 2.111
+          }
+        },
+        {
+          "id": "11",
+          "label": "부록 11 참고",
+          "target": "seq-appK",
+          "region": {
+            "x": 41.55,
+            "y": 69.609,
+            "w": 1.563,
+            "h": 2.111
+          }
+        }
+      ]
+    },
+    {
+      "sceneId": "s10",
+      "notes": "K-방산 관점에서 네 가지를 확인했습니다.\n\n먼저 무기체계 분류입니다. 훈령의 무기체계 세부분류에 ‘전술훈련모의장비’라는 항목이 있습니다. 실제로 이 항목으로 분류될지는 신속원이 판단하므로 사전 문의가 필요합니다. 공모 분야로는 10대 국방전략기술 중 인공지능에 해당합니다.\n\n예산 선례도 있습니다. 이번 달 국방부의 AI 대드론 훈련 시뮬레이터 신속상용화 지원사업이 12개월, 20억 원 규모로 착수했다고 보도됐습니다.\n\n해외에는 캐나다군 화력유도 훈련 연구, 그리고 교육생 교신을 자동 채점하는 관제사 훈련 시뮬레이터 ASTRA 같은 선례가 있습니다.",
+      "hotspots": [
+        {
+          "id": "9",
+          "label": "부록 9 참고",
+          "target": "seq-appI",
+          "region": {
+            "x": 49.171,
+            "y": 23.811,
+            "w": 1.187,
+            "h": 2.111
+          }
+        },
+        {
+          "id": "10",
+          "label": "부록 10 참고",
+          "target": "seq-appJ",
+          "region": {
+            "x": 44.765,
+            "y": 46.342,
+            "w": 1.563,
+            "h": 2.111
+          }
+        },
+        {
+          "id": "8",
+          "label": "부록 8 참고",
+          "target": "seq-appH",
+          "region": {
+            "x": 51.649,
+            "y": 59.519,
+            "w": 1.188,
+            "h": 2.111
+          }
+        }
+      ]
+    },
+    {
+      "sceneId": "s12",
+      "notes": "확장 경로입니다. 교육장에서 시작합니다. 여기서 정답이 붙은 군 음성과 채점 모델을 얻습니다.\n\n다음은 훈련장입니다. KCTC 같은 과학화훈련장의 무전을 7필드로 정리해서 교전 타임라인과 사후강평 리포트를 자동으로 만듭니다. KCTC가 연구하려는 AI 전투분석체계와 같은 방향입니다.\n\n마지막이 실전입니다. 무전 내용을 표준 보고서로 만들어 사람이 승인하면 지휘통제체계로 넘깁니다. 1단계 신청서에서 그린 TICN 실증 로드맵과 같은 방향입니다.\n\n각 단계의 데이터가 다음 단계의 출발점이 됩니다. 사진은 AI로 생성한 이미지입니다.",
+      "hotspots": [
+        {
+          "id": "12",
+          "label": "부록 12 참고",
+          "target": "seq-appL",
+          "region": {
+            "x": 41.286,
+            "y": 87.325,
+            "w": 1.563,
+            "h": 2.111
+          }
+        }
+      ]
+    },
+    {
+      "sceneId": "s13",
+      "notes": "실행 계획은 모두 가안입니다.\n\nMVP는 시나리오 세 가지로 시작합니다. 정찰 보고, 화력 요청, 의무후송 요청입니다. 정확한 양식은 교범으로 확인하겠습니다.\n\n11월에는 개발보다 확인에 집중합니다. 교관 인터뷰 세 건, 경북창경과 신속원 문의, 시나리오 초안입니다. 12월은 1단계 마무리가 우선이라 검수만 병행합니다.\n\n실제 개발은 1단계가 끝난 뒤 1월부터 6~8주, 3월에 교관 앞에서 시연하는 것이 목표입니다. 자금은 K-방산 2단계, 신속시범사업, 국방부 신속상용화 세 갈래를 보고 있습니다.\n\n이상입니다. 질문 주시면 부록으로 답변드리겠습니다.",
+      "hotspots": [
+        {
+          "id": "6",
+          "label": "부록 6 참고",
+          "target": "seq-appF",
+          "region": {
+            "x": 6.375,
+            "y": 28.127,
+            "w": 1.188,
+            "h": 2.111
+          }
+        },
+        {
+          "id": "7",
+          "label": "부록 7 참고",
+          "target": "seq-appG",
+          "region": {
+            "x": 26.467,
+            "y": 43.38,
+            "w": 1.188,
+            "h": 2.111
+          }
+        },
+        {
+          "id": "10",
+          "label": "부록 10 참고",
+          "target": "seq-appJ",
+          "region": {
+            "x": 47.988,
+            "y": 86.991,
+            "w": 1.563,
+            "h": 2.111
+          }
+        }
+      ]
+    }
+  ],
+  "slideSequences": [
+    {
+      "id": "seq-appA",
+      "label": "부록 1. 용어·약어 사전",
+      "slides": [
+        {
+          "sceneId": "appA",
+          "notes": "질문 대응 메모\n\n약어 질문이 나오면 이 장을 띄웁니다. 본문 각 장 하단에도 그 장의 약어가 적혀 있습니다."
+        }
+      ]
+    },
+    {
+      "id": "seq-appB",
+      "label": "부록 2. 1단계 과제 요약",
+      "slides": [
+        {
+          "sceneId": "appB",
+          "notes": "질문 대응 메모\n\nQ. 1단계 일정에 영향은 없나? MVP 개발은 1단계 종료(12/31) 뒤 1월 착수라 겹치지 않습니다. 11~12월은 확인과 시나리오 작업만 합니다.\n\nQ. 1단계 서버를 그대로 쓰나? 입력 어댑터, STT·보정, 7필드, DB를 재사용합니다."
+        }
+      ]
+    },
+    {
+      "id": "seq-appC",
+      "label": "부록 3. 데이터 근거 상세",
+      "slides": [
+        {
+          "sceneId": "appC",
+          "notes": "질문 대응 메모\n\nQ. 항공 사례를 군 무전에 그대로 적용할 수 있나? 그래서 한국어 군사용어 연구를 맨 위에 뒀습니다. 같은 Whisper도 교범 데이터를 학습하자 문자 오류율이 13.68%에서 7.94%로 내려갔습니다."
+        }
+      ]
+    },
+    {
+      "id": "seq-appD",
+      "label": "부록 4. 군 음성 데이터 현황",
+      "slides": [
+        {
+          "sceneId": "appD",
+          "notes": "질문 대응 메모\n\nQ. 국방부가 데이터를 모으면 우리가 쓸 수 있지 않나? 국방AI데이터허브는 아직 사전 설계 단계의 구상입니다. 쓸 수 있게 되더라도, 교신 훈련 데이터처럼 정답이 붙은 군 음성은 우리가 만든 것이 차별점입니다."
+        }
+      ]
+    },
+    {
+      "id": "seq-appE",
+      "label": "부록 5. 국방 AI·예산 동향",
+      "slides": [
+        {
+          "sceneId": "appE",
+          "notes": "질문 대응 메모\n\nQ. 왜 지금인가? 2027년 정부안에서 AI·유무인 복합체계 예산이 4,968억 원에서 7,727억 원으로 늘었습니다. 반면 수출 수주는 2026년 7월 말 기준 약 80억 달러로 주춤합니다. 스타트업에게는 국내 AI 예산이 현실적인 기회입니다.\n\n2027년 수치는 국회 심의 전 정부안입니다."
+        }
+      ]
+    },
+    {
+      "id": "seq-appF",
+      "label": "부록 6. 시나리오 설계 틀(안)",
+      "slides": [
+        {
+          "sceneId": "appF",
+          "notes": "질문 대응 메모\n\nQ. 시나리오는 몇 개나 만들어야 하나? MVP는 3종으로 시작하고, 교관 인터뷰에서 자주 쓰는 교신 유형을 받아 늘립니다."
+        }
+      ]
+    },
+    {
+      "id": "seq-appG",
+      "label": "부록 7. 채점 기준(안)",
+      "slides": [
+        {
+          "sceneId": "appG",
+          "notes": "질문 대응 메모\n\nQ. 음성인식이 틀리면 채점도 틀리지 않나? 그래서 단어가 아니라 항목 단위로 대조하고, 확신이 낮으면 교관에게 넘깁니다. 항공관제 연구에서도 단어 단위 대조는 비효율적이었고 개념 단위 대조가 더 견고했습니다."
+        }
+      ]
+    },
+    {
+      "id": "seq-appH",
+      "label": "부록 8. 유사 사례",
+      "slides": [
+        {
+          "sceneId": "appH",
+          "notes": "질문 대응 메모\n\nQ. 해외 제품이 들어오면? 확인된 해외 사례는 모두 영어·항공 교신 중심입니다. 한국어 군 용어와 한국군 교신 절차, 내부망 설치가 진입 장벽이 되고, 저희는 1단계에서 군 용어 보정을 이미 만들고 있습니다."
+        }
+      ]
+    },
+    {
+      "id": "seq-appI",
+      "label": "부록 9. 무기체계 분류 근거",
+      "slides": [
+        {
+          "sceneId": "appI",
+          "notes": "질문 대응 메모\n\nQ. 교육용인데 무기체계로 인정되나? 훈령의 무기체계 세부분류에 전술훈련모의장비가 명시돼 있습니다. 다만 이 제품이 그 항목으로 분류될지는 신속원이 판단하므로 사전 문의가 첫 확인 항목입니다."
+        }
+      ]
+    },
+    {
+      "id": "seq-appJ",
+      "label": "부록 10. 지원사업 창구 상세",
+      "slides": [
+        {
+          "sceneId": "appJ",
+          "notes": "질문 대응 메모\n\nQ. 신속시범에 선정되면 우리가 개발하나? 공모문상 대상사업 선정 뒤 수행기관은 경쟁입찰 등 별도 절차로 뽑습니다.\n\nQ. 가장 빠른 자금은? K-방산 2단계(2027)입니다. 방향 변경 가능 여부가 첫 확인 항목입니다."
+        }
+      ]
+    },
+    {
+      "id": "seq-appK",
+      "label": "부록 11. 리스크 상세 대응표",
+      "slides": [
+        {
+          "sceneId": "appK",
+          "notes": "질문 대응 메모\n\nQ. 가장 큰 리스크는? 실제 수요입니다. 그래서 11월을 개발이 아닌 확인 기간으로 잡았고, 결과를 보고 개발 착수를 다시 결정하자고 제안드립니다."
+        }
+      ]
+    },
+    {
+      "id": "seq-appL",
+      "label": "부록 12. 확장 경로 상세",
+      "slides": [
+        {
+          "sceneId": "appL",
+          "notes": "질문 대응 메모\n\nQ. 원래 2단계 계획(보안형 의사결정 지원 서버)은 버리나? 버리지 않습니다. 실전 단계가 그 계획의 연장선이고, 교육장 데이터가 그 모델을 먼저 키워 줍니다. 2단계 신청 방향은 경북창경 확인 후 정합니다."
+        }
+      ]
+    },
+    {
+      "id": "seq-appM",
+      "label": "부록 13. 아이디어 선정 과정",
+      "slides": [
+        {
+          "sceneId": "appM",
+          "notes": "질문 대응 메모\n\nQ. 드론 탐지는 왜 안 하나? 대드론 예산은 크지만 하드웨어 개발이 필요하고 1단계 자산을 덜 씁니다. 신속시범 수요신청서만 내보는 저비용 베팅으로는 따로 검토할 수 있습니다."
+        }
+      ]
+    },
+    {
+      "id": "seq-appZ",
+      "label": "출처 전체",
+      "slides": [
+        {
+          "sceneId": "appZ",
+          "notes": "질문 대응 메모\n\n수치 출처 질문이 나오면 이 장을 띄웁니다. 링크를 누르면 원문이 열립니다."
+        }
+      ]
+    }
+  ]
+}
+</script>
+<div id="root" data-composition-id="root" data-start="0" data-duration="108" data-width="1920" data-height="1080">
+<div id="scene-s0" class="scene-frame clip" data-composition-id="s0" data-start="0" data-duration="4" data-track-index="1" data-label="표지" data-width="1920" data-height="1080">
+<div class="scale-box"><section class="slide cover">
+  <div class="head">
+    <div>
+      <p class="ttl">AI 무전 교관</p>
+      <p class="ttl2">데이터를 만드는 제품</p>
+      <p class="lede">1단계 전장 음성 엔진의 다음 걸음</p>
+    </div>
+    <figure>
+      <img class="photo" src="assets/cover.jpg" alt="헤드셋을 쓰고 무전기 송수화기로 교신하는 교육생 (AI 생성 이미지)">
+      <figcaption class="cap">AI 생성 이미지(Codex). 실제 장면이 아닙니다.</figcaption>
+    </figure>
+  </div>
+  <svg class="wave" id="wave" viewBox="0 0 1408 60" aria-hidden="true"></svg>
+  <p class="tx"><span class="who">14:20:05 한빛 송신</span>“상황실, 여기는 한빛. <span class="hl" data-f="시간" style="--d:.2s">14시 20분</span>, <span class="hl" data-f="좌표" style="--d:.5s">CH 1234 5678</span>, <span class="hl" data-f="표적명" style="--d:.8s">적 보병 분대</span>, <span class="hl" data-f="상황" style="--d:1.1s">북쪽으로 이동 중</span>. 이상.”</p>
+  <div class="meta"><span>K-방산 2차 아이디어 내부 발표</span><span>㈜에이포에이아이</span><span>2026년 10월</span><span>교신 내용은 가상 예시입니다</span></div>
+</section></div>
+</div>
+<div id="scene-toc" class="scene-frame clip" data-composition-id="toc" data-start="4" data-duration="4" data-track-index="1" data-label="목차" data-width="1920" data-height="1080">
+<div class="scale-box"><section class="slide ">
+  <h1 class="t">목차</h1>
+  <div class="body">
+    <nav class="toc" aria-label="목차">
+      <div class="toc-card"><img class="photo" src="assets/toc-1.jpg" alt="서버 장비를 점검하는 엔지니어들 (AI 생성 이미지)"><span class="n">1</span><h2>우리는 어디에 서 있나</h2><p>1단계 음성 엔진과 함께 쓸 자산</p></div>
+      <div class="toc-card"><img class="photo" src="assets/toc-2.jpg" alt="헤드폰, 무전기 송수화기, 음성 파형이 뜬 노트북 (AI 생성 이미지)"><span class="n">2</span><h2>데이터가 승부를 가른다</h2><p>성능을 가르는 군 음성 데이터, 그리고 그 데이터를 만드는 제품</p></div>
+      <div class="toc-card"><img class="photo" src="assets/toc-3.jpg" alt="교육생들의 교신 점수를 노트북으로 보는 교관 (AI 생성 이미지)"><span class="n">3</span><h2>AI 무전 교관</h2><p>훈련 흐름, 제품 컨셉, 동작 방식, 데이터 선순환, K-방산 적합성</p></div>
+      <div class="toc-card"><img class="photo" src="assets/toc-4.jpg" alt="새벽 산길을 달리는 안테나 달린 군용 차량 (AI 생성 이미지)"><span class="n">4</span><h2>확장과 실행</h2><p>교육장에서 훈련장, 실전까지의 경로와 실행 계획(안)</p></div>
+    </nav>
+    <p class="toc-app"><b style="color:var(--ink)">부록</b><span class="ref" data-ref="appA">1</span><span class="ref" data-ref="appB">2</span><span class="ref" data-ref="appC">3</span><span class="ref" data-ref="appD">4</span><span class="ref" data-ref="appE">5</span><span class="ref" data-ref="appF">6</span><span class="ref" data-ref="appG">7</span><span class="ref" data-ref="appH">8</span><span class="ref" data-ref="appI">9</span><span class="ref" data-ref="appJ">10</span><span class="ref" data-ref="appK">11</span><span class="ref" data-ref="appL">12</span><span class="ref" data-ref="appM">13</span><span class="ref" data-ref="appZ">출처</span> &nbsp;용어 사전, 1단계 과제 요약, 데이터 근거, 예산 그래프, 시나리오·채점 설계, 지원사업, 리스크 대응표, 출처 전체</p>
+  </div>
+  <footer class="foot"><div class="abbr"><span>사진은 AI 생성 이미지(Codex)이며 실제 장면이 아닙니다</span></div></footer>
+</section></div>
+</div>
+<div id="scene-s2" class="scene-frame clip" data-composition-id="s2" data-start="8" data-duration="4" data-track-index="1" data-label="A4AI 자산" data-width="1920" data-height="1080">
+<div class="scale-box"><section class="slide ">
+  <h1 class="t">우리는 이미 전장 음성을 데이터로 바꾸는 엔진을 만들고 있습니다</h1>
+  <div class="body">
+    <div class="cols c2" style="margin-top:16px">
+      <div>
+        <p style="font-size:22px;font-weight:600;margin:0 0 14px">1단계 AI 기능검증 서버의 처리 흐름<sup class="c">1</sup><span class="ref" data-ref="appB">2</span></p>
+        <div class="chain">
+          <span>입력 어댑터</span><i>&gt;</i><span>세션 식별</span><i>&gt;</i><span>Whisper STT</span><i>&gt;</i><span>군 용어·숫자·좌표 보정</span><i>&gt;</i><span>7필드 구조화</span><i>&gt;</i><span>운용자 승인</span><i>&gt;</i><span>통화단위 DB</span>
+        </div>
+        <p class="muted" style="font-size:20px;line-height:1.6;margin:24px 0 0">19인치 2U 서버 1식, 2026.07.15~12.31. 교환기 스위치의 SPAN 출력을 받는 구조이고, 사람이 승인한 결과를 원음과 함께 저장합니다.<sup class="c">1</sup></p>
+      </div>
+      <ul class="assets">
+        <li><b>GCS Saker</b> 관제·상황표시 화면과 이벤트 로그<sup class="c">1</sup></li>
+        <li><b>군용 무전기 AI 소음감쇄 칩</b> 창업중심대학 과제, 수행 중<sup class="c">1</sup></li>
+        <li><b>지휘관 의사결정 지원 SW</b> 초기창업패키지 과제<sup class="c">1</sup></li>
+        <li><b>특허</b> 등록 2건, 통상실시권 1건(무인기 추적 지상통제장비), 출원 3건<sup class="c">1</sup></li>
+        <li><b>과제책임자</b> ROTC 육군 정보통신단 통신장교 출신<sup class="c">1</sup></li>
+        <li><b>장비</b> GPU 워크스테이션(RTX 5090), DGX Spark, WAS 서버<sup class="c">1</sup></li>
+      </ul>
+    </div>
+  </div>
+  <footer class="foot"><div class="abbr"><span><b>SPAN</b>스위치 포트 미러링. 통화에 끼어들지 않고 복제해 받는 방식</span><span><b>STT</b>음성을 텍스트로 바꾸는 기술</span><span><b>Whisper</b>공개 음성인식 모델</span><span><b>GCS</b>지상통제·관제 화면</span></div>
+    <div class="cites"><span><b>1</b>㈜에이포에이아이, K-방산 스타트업 1단계 과제 신청서(제출본), 2026.07.31</span></div></footer>
+</section></div>
+</div>
+<div id="scene-s3" class="scene-frame clip" data-composition-id="s3" data-start="12" data-duration="4" data-track-index="1" data-label="성능은 데이터가 결정한다" data-width="1920" data-height="1080">
+<div class="scale-box"><section class="slide ">
+  <h1 class="t">같은 Whisper라도, 어떤 군 데이터를 학습했느냐에 따라 오류율이 갈렸습니다</h1>
+  <div class="body">
+    <div style="display:grid;grid-template-columns:1.55fr 1fr;gap:56px;margin-top:6px">
+      <div>
+        <p class="chart-title">한국어 군사용어 음성인식, 학습 데이터별 문자 오류율(CER)<sup class="c">1</sup><span class="ref" data-ref="appC">3</span></p>
+        <p class="chart-sub">낮을수록 정확. 각 10시간 학습, 같은 평가 데이터</p>
+        <div class="chart" data-chart='{"max":15,"ticks":[0,5,10,15],"unit":"%","labelW":300,"barH":46,"gap":22,"rows":[{"label":"기존 Whisper (추가 학습 없음)","values":[13.68],"tip":"CER 13.68% · WER 7.01%","c":0},{"label":"군사용어사전 학습","values":[12.36],"tip":"CER 12.36% · WER 6.97%","c":1},{"label":"군사 간행물 학습","values":[8.42],"tip":"CER 8.42% · WER 4.54%","c":1},{"label":"군사 교범 학습","values":[7.94],"tip":"CER 7.94% · WER 4.21%","c":1}]}'></div>
+        <p class="muted" style="font-size:17px;margin:8px 0 0">전술 개념이 담긴 교범 데이터를 학습한 모델이 가장 정확했습니다.<sup class="c">1</sup></p>
+      </div>
+      <div class="tiles">
+        <div class="tile"><div class="k">항공 무선 교신(미국 12개 공항 녹음), 시판 음성인식의 단어 오류율<sup class="c">2</sup></div><div class="v">80% <small>에서</small> 15% <small>미만으로</small></div><div class="k">그 분야 데이터로 맞춤화한 뒤</div></div>
+        <div class="tile"><div class="k">싱가포르 억양 관제 교신, 시판 모델의 단어 오류율<sup class="c">3</sup></div><div class="v">최대 107.8% <small>에서</small> 23.45%<small>로</small></div><div class="k">맞춤 학습한 뒤</div></div>
+        <div class="tile"><div class="k">우리 1단계 KPI도 같은 구조<sup class="c">4</sup></div><div class="k" style="color:var(--ink);font-size:19px;margin-top:6px">군 용어 특화 요소를 적용하기 전과 후의 개선폭을 잽니다.<span class="ref" data-ref="appB">2</span></div></div>
+      </div>
+    </div>
+    <p class="take">모델은 같아도, 그 분야 데이터를 학습한 쪽이 이겼습니다.</p>
+  </div>
+  <footer class="foot"><div class="abbr"><span><b>CER / WER</b>문자 / 단어 오류율. 낮을수록 정확</span><span><b>KPI</b>핵심 성과 지표</span></div>
+    <div class="cites"><span><b>1</b>차현우·마정목, 「트랜스포머 기반 군사용 자동음성인식 모델 제안 및 평가」, 한국산학기술학회논문지 25(3), 2024</span><span><b>2</b>AIN, “Embry-Riddle Enhances Aviation Radio Comms with AI”, 2026</span><span><b>3</b>ASTRA 관제사 훈련 시뮬레이터 논문, arXiv 2606.18319, 2026.06</span><span><b>4</b>1단계 과제 신청서(제출본), 2026.07.31</span></div></footer>
+</section></div>
+</div>
+<div id="scene-s4" class="scene-frame clip" data-composition-id="s4" data-start="16" data-duration="4" data-track-index="1" data-label="군 음성 데이터는 만들어 써야 했다" data-width="1920" data-height="1080">
+<div class="scale-box"><section class="slide ">
+  <h1 class="t">군 음성 데이터는 연구자도, 우리도 직접 만들어 써 왔습니다</h1>
+  <div class="body">
+    <div class="blocks" style="margin-top:10px">
+      <div class="blk"><h2>실전 무전<span class="ref" data-ref="appD">4</span></h2><p>1단계도 승인 파일과 모의 시험망으로 시험하고, 실제 TICN 운용망 연동은 후속 범위로 남겼습니다. 음성·구조화 데이터는 민감정보로 반출을 통제합니다.<sup class="c">1</sup></p></div>
+      <div class="blk"><h2>연구용 데이터<span class="ref" data-ref="appC">3</span></h2><p>한국어 군사용어 음성인식 연구는 현역 장교 10명이 교범·용어사전·간행물을 읽어 녹음한 음성을 각 10시간씩 학습했습니다.<sup class="c">2</sup></p></div>
+      <div class="blk"><h2>훈련장 데이터<span class="ref" data-ref="appD">4</span></h2><p>KCTC는 영상·음성 등 데이터가 데이터베이스와 백업매체에 흩어져 있고, AI가 학습하도록 정제하는 도구가 없다고 진단했습니다.<sup class="c">3</sup></p></div>
+      <div class="blk"><h2>사내 경험</h2><p>VCM 과제에서도 외부 음원은 이용 조건과 재배포 범위를 먼저 확인하고, 어려우면 라이선스가 명확한 음원을 우선 쓰기로 했습니다.<sup class="c">4</sup></p></div>
+    </div>
+    <p class="take">필요한 군 음성 데이터는 결국 직접 만들어야 했습니다.</p>
+  </div>
+  <footer class="foot"><div class="abbr"><span><b>TICN</b>전술정보통신체계</span><span><b>KCTC</b>육군 과학화전투훈련단</span><span><b>VCM</b>A4AI의 음성 소음 저감 과제</span></div>
+    <div class="cites"><span><b>1</b>1단계 과제 신청서(제출본), 2026.07.31</span><span><b>2</b>차현우·마정목, 한국산학기술학회논문지 25(3), 2024</span><span><b>3</b>뉴스1, 「KCTC, AI로 ‘승리 알고리즘’ 찾는다」, 2026.08.08</span><span><b>4</b>개발팀 회의록, 2026.07.20</span></div></footer>
+</section></div>
+</div>
+<div id="scene-s5" class="scene-frame clip" data-composition-id="s5" data-start="20" data-duration="4" data-track-index="1" data-label="데이터를 만드는 제품" data-width="1920" data-height="1080">
+<div class="scale-box"><section class="slide ">
+  <h1 class="t">그래서 쓰일수록 정답 데이터가 생기는 제품을 만들려 합니다</h1>
+  <p class="sub">그런 제품이 갖춰야 할 조건을 세 가지로 정했습니다.</p>
+  <div class="body">
+    <div class="cols c3 conds">
+      <div class="cond"><h2>정답이 미리 정해져 있을 것</h2><p>사람이 일일이 듣고 받아 적지 않아도 데이터에 정답이 붙어야 합니다.</p></div>
+      <div class="cond"><h2>반복해서 쓰일 것</h2><p>한 번 쓰고 끝나는 장비가 아니라 반복해서 쓰여야 데이터가 쌓입니다.</p></div>
+      <div class="cond"><h2>실전망 밖에서 돌 것</h2><p>운용망에 연결하지 않아도 동작해야 빨리 시작하고 데이터를 모을 수 있습니다.</p></div>
+    </div>
+    <p class="take">세 조건에 맞춰 고른 것이 무전 교신 훈련입니다.</p>
+  </div>
+  <footer class="foot"><div class="abbr"><span>이 장의 조건은 A4AI가 정한 설계 기준입니다</span></div></footer>
+</section></div>
+</div>
+<div id="scene-s6" class="scene-frame clip" data-composition-id="s6" data-start="24" data-duration="4" data-track-index="1" data-label="훈련도 AI 평가로 간다" data-width="1920" data-height="1080">
+<div class="scale-box"><section class="slide ">
+  <h1 class="t">육군도 훈련 평가와 피드백을 AI로 바꾸려 하고 있습니다</h1>
+  <div class="body">
+    <div class="cols c64" style="margin-top:20px">
+      <div class="pts">
+        <div class="pt"><b>분석은 아직 사람의 경험에 기댑니다<sup class="c">1</sup></b><span>KCTC는 훈련 분석이 사후분석관·관찰통제관의 경험과 직관에 상당 부분 의존해 시간과 인력이 많이 든다고 자체 진단했습니다.</span></div>
+        <div class="pt"><b>육군이 연구할 방향<sup class="c">1</sup></b><span>훈련 시나리오 자동 생성, 난이도 자동 조정, 훈련 중 수준평가·피드백, 훈련 종료와 동시에 사후검토.</span></div>
+        <div class="pt"><b>해외는 무전 절차 훈련에 음성인식을 씁니다<sup class="c">2</sup></b><span>캐나다군 JTAC 훈련 연구는 교육생이 외워야 하는 화력 요청 무전 절차를 음성인식과 VR로 훈련합니다.</span></div>
+      </div>
+      <div class="box" style="align-self:start;padding:22px 26px">
+        <h2 style="font-size:22px">AI 무전 교관의 위치</h2>
+        <p style="font-size:20px">육군이 연구하려는 시나리오 자동 생성과 훈련 중 평가·피드백을, 무전 교신 훈련에 먼저 적용하는 제품입니다.</p>
+        <p style="font-size:18px;margin-top:14px" class="muted">현장 교관의 실제 수요는 아직 직접 확인하지 않았습니다. 확인 계획<span class="ref" data-ref="appK">11</span></p>
+      </div>
+    </div>
+  </div>
+  <footer class="foot"><div class="abbr"><span><b>KCTC</b>육군 과학화전투훈련단</span><span><b>관찰통제관</b>훈련 중 부대를 관찰·평가하는 요원</span><span><b>JTAC</b>합동 최종공격 통제관(항공 화력 유도)</span></div>
+    <div class="cites"><span><b>1</b>뉴스1, 「KCTC, AI로 ‘승리 알고리즘’ 찾는다」, 2026.08.08</span><span><b>2</b>Calian, JTAC VR 훈련기 사례 연구(캐나다 국가연구위원회 지원, 게시일 미표기)</span></div></footer>
+</section></div>
+</div>
+<div id="scene-s7" class="scene-frame clip" data-composition-id="s7" data-start="28" data-duration="4" data-track-index="1" data-label="제품 컨셉" data-width="1920" data-height="1080">
+<div class="scale-box"><section class="slide ">
+  <h1 class="t">AI가 상대 무전병을 맡고, 교신을 받아 적고, 바로 채점합니다</h1>
+  <div class="body">
+    <div class="cols c2" style="gap:48px;margin-top:8px">
+      <div>
+        <div class="pair">
+          <div class="node ai"><h2>AI 상대 무전병</h2><p>상황실, 사격지휘, 인접부대 역할을 음성으로</p></div>
+          <svg viewBox="0 0 64 40" width="64" height="40" aria-hidden="true"><path d="M8 13H54M46 6l8 7-8 7M56 27H10M18 20l-8 7 8 7" fill="none" stroke="#1D2A24" stroke-width="2.5"/></svg>
+          <div class="node"><h2>교육생</h2><p>절차대로 보고·복창</p></div>
+        </div>
+        <div class="vlink">교신 전체를 받아 적음</div>
+        <div class="node"><h2>자동 채점</h2><p>빠진 항목, 숫자·좌표, 절차, 응답 시간<span class="ref" data-ref="appG">7</span></p></div>
+        <div class="vlink">결과와 녹음을 모음</div>
+        <div class="node"><h2>교관 콘솔 (GCS Saker 기반)</h2><p>교육생별 점수, 반복되는 실수, 녹음 다시 듣기</p></div>
+      </div>
+      <div class="card" style="align-self:start">
+        <h2>화면 예시 (가상)<span class="ref" data-ref="appF">6</span></h2>
+        <p class="tx"><span class="who">AI 상황실</span>“한빛, 여기는 상황실. 관측 내용 보고하라. 이상.”</p>
+        <p class="tx"><span class="who">교육생</span>“상황실, 여기는 한빛. <span class="hl">14시 20분</span>, 좌표 <span class="hl">CH 1234 5678</span>, <span class="hl">적 보병 분대</span>, <span class="hl">북쪽으로 이동 중</span>. 이상.”</p>
+        <div class="score">시간 <span class="ok">✓</span> &nbsp; 좌표 <span class="ok">✓</span> &nbsp; 표적 <span class="ok">✓</span> &nbsp; 상황 <span class="ok">✓</span> &nbsp; 자산 <span class="miss">누락</span><br><span class="muted">교관 콘솔에 “자산 항목이 빠졌습니다”로 표시</span></div>
+      </div>
+    </div>
+  </div>
+  <footer class="foot"><div class="abbr"><span><b>GCS Saker</b>A4AI의 관제·상황표시 제품</span><span><b>복창</b>받은 지시를 되받아 말해 확인하는 절차</span><span>교신 내용과 채점 항목은 가상 예시입니다</span></div></footer>
+</section></div>
+</div>
+<div id="scene-s8" class="scene-frame clip" data-composition-id="s8" data-start="32" data-duration="4" data-track-index="1" data-label="동작 방식" data-width="1920" data-height="1080">
+<div class="scale-box"><section class="slide ">
+  <h1 class="t">일곱 단계 중 넷은 1단계 엔진을 그대로 씁니다</h1>
+  <div class="body">
+    <div class="flow" style="margin-top:18px">
+      <div class="step new"><span class="n">1</span><h2>시나리오 선택</h2><p>교범을 바탕으로 쓴 상황과 정답 항목</p><span class="tg">신규</span></div>
+      <div class="step new"><span class="n">2</span><h2>AI 역할자 송신</h2><p>음성 합성에 무전기 음질·잡음 효과를 입힘</p><span class="tg">신규</span></div>
+      <div class="step reuse"><span class="n">3</span><h2>교육생 음성 수신</h2><p>파일, 헤드셋, 무전기 입력</p><span class="tg">1단계 입력 어댑터</span></div>
+      <div class="step reuse"><span class="n">4</span><h2>음성인식·보정</h2><p>Whisper STT와 군 용어·숫자·좌표 보정</p><span class="tg">1단계 그대로</span></div>
+      <div class="step reuse"><span class="n">5</span><h2>7필드 추출</h2><p>시간, 좌표, 명령, 상황 등으로 구조화</p><span class="tg">1단계 그대로</span></div>
+      <div class="step new"><span class="n">6</span><h2>정답 대조 채점</h2><p>시나리오 정답과 항목 단위로 비교</p><span class="tg">신규</span></div>
+      <div class="step reuse"><span class="n">7</span><h2>저장·리포트</h2><p>원음, 결과, 교관 확인 이력을 통화 단위로</p><span class="tg">1단계 DB·승인 이력</span></div>
+    </div>
+    <div class="legend"><span><i class="r"></i>1단계 재사용 4단계</span><span><i class="w"></i>새로 만드는 3단계</span></div>
+    <p class="muted" style="font-size:20px;line-height:1.6;margin:22px 0 0;max-width:1250px">1단계 서버는 인터넷 API 없이 온프레미스로 동작하도록 설계돼 있습니다.<sup class="c">1</sup> AI 무전 교관도 같은 구조를 씁니다.<span class="ref" data-ref="appB">2</span> 채점 방식<span class="ref" data-ref="appG">7</span></p>
+  </div>
+  <footer class="foot"><div class="abbr"><span><b>음성 합성(TTS)</b>텍스트를 음성으로 읽어 주는 기술</span><span><b>온프레미스</b>외부 인터넷 없이 현장 내부망에서 운용</span></div>
+    <div class="cites"><span><b>1</b>1단계 과제 신청서(제출본) 2-5 범위·해석 주의, 2026.07.31</span></div></footer>
+</section></div>
+</div>
+<div id="scene-s9" class="scene-frame clip" data-composition-id="s9" data-start="36" data-duration="4" data-track-index="1" data-label="정답을 우리가 쥔다" data-width="1920" data-height="1080">
+<div class="scale-box"><section class="slide ">
+  <h1 class="t">교육생이 말할 때마다, 정답이 붙은 군 음성이 한 건씩 쌓입니다</h1>
+  <div class="body">
+    <div style="display:grid;grid-template-columns:1fr 700px;gap:40px;align-items:start">
+      <div class="compare">
+        <div class="row"><h2>보통의 음성 데이터 구축</h2><p>녹음 수집, 사람이 듣고 받아 적기, 검수, 학습.</p><p>앞 장처럼 군 음성은 녹음부터 직접 만들어야 했습니다.</p></div>
+        <div class="row ours"><h2>AI 무전 교관</h2><p style="margin-top:8px">시나리오를 우리가 쓰므로 정답이 이미 있습니다. 교육생이 말하는 순간 정답이 붙은 음성으로 저장됩니다.</p><p>사람 손이 가는 건 애매한 판정의 교관 확인뿐입니다.</p></div>
+        <p style="font-size:22px;font-weight:600;line-height:1.5;margin:6px 0 0;padding-top:16px;border-top:2px solid var(--ink)">1단계 신청서도 저장한 원음·보정문·7필드를 2단계 학습·평가 데이터로 쓰는 계획입니다.<sup class="c">1</sup><span class="ref" data-ref="appL">12</span></p>
+        <p class="muted" style="font-size:18px;line-height:1.6;margin-top:12px">교육 환경과 전장의 음질 차이는 무전기 음질·잡음 합성으로 보완할 계획입니다.<span class="ref" data-ref="appK">11</span></p>
+      </div>
+      <div class="wheel" aria-label="데이터 선순환: 교육 횟수 증가, 정답 붙은 군 음성 증가, 인식·채점 정확도 향상, 더 쓸 만한 교관">
+        <svg viewBox="0 0 700 480" aria-hidden="true">
+          <circle cx="350" cy="240" r="170" fill="none" stroke="#4E5D3C" stroke-width="3"/>
+          <g fill="#4E5D3C">
+            <g transform="translate(470.2,360.2) rotate(135)"><path d="M-11,-8 L11,0 L-11,8 Z"/></g>
+            <g transform="translate(229.8,360.2) rotate(225)"><path d="M-11,-8 L11,0 L-11,8 Z"/></g>
+            <g transform="translate(229.8,119.8) rotate(315)"><path d="M-11,-8 L11,0 L-11,8 Z"/></g>
+            <g transform="translate(470.2,119.8) rotate(45)"><path d="M-11,-8 L11,0 L-11,8 Z"/></g>
+          </g>
+        </svg>
+        <span class="lb" style="left:350px;top:70px">교육 횟수 증가</span>
+        <span class="lb" style="left:520px;top:240px">정답 붙은 군 음성 증가</span>
+        <span class="lb" style="left:350px;top:410px">인식·채점 정확도 향상</span>
+        <span class="lb" style="left:180px;top:240px">더 쓸 만한 교관</span>
+      </div>
+    </div>
+  </div>
+  <footer class="foot"><div class="abbr"><span><b>선순환(플라이휠)</b>쓰일수록 데이터가 쌓이고 성능이 올라 더 많이 쓰이는 구조</span></div>
+    <div class="cites"><span><b>1</b>1단계 과제 신청서(제출본) 과제 종료 이후 5년간 기대효과 2년차, 2026.07.31</span></div></footer>
+</section></div>
+</div>
+<div id="scene-s10" class="scene-frame clip" data-composition-id="s10" data-start="40" data-duration="4" data-track-index="1" data-label="K-방산 적합성 검증" data-width="1920" data-height="1080">
+<div class="scale-box"><section class="slide ">
+  <h1 class="t">K-방산 기준으로 네 가지를 확인했습니다</h1>
+  <div class="body">
+    <div class="checks" style="margin-top:10px">
+      <div class="chk"><h2>무기체계 분류 항목이 있는가</h2><p><strong>있습니다.</strong> 무기체계 세부분류에 ‘그 밖의 무기체계 &gt; 국방M&amp;S체계 &gt; 전술훈련모의장비’가 있습니다.<sup class="c">1</sup> 실제 분류 판단은 신속원이 합니다.<span class="ref" data-ref="appI">9</span></p></div>
+      <div class="chk"><h2>공모 분야에 해당하는가</h2><p><strong>해당합니다.</strong> 신속시범사업 공모 분야인 10대 국방전략기술에 인공지능이 있습니다.<sup class="c">2</sup></p></div>
+      <div class="chk"><h2>예산이 나온 선례가 있는가</h2><p><strong>있습니다.</strong> 국방부 ‘AI 기반 VR·MR 대드론 훈련 시뮬레이터 개발 및 신속상용화 지원사업’, 12개월, 정부지원금 20억 원.<sup class="c">3</sup><span class="ref" data-ref="appJ">10</span></p></div>
+      <div class="chk"><h2>해외 선례가 있는가</h2><p><strong>있습니다.</strong> 캐나다군 JTAC 음성인식 VR 훈련 연구<sup class="c">4</sup>, 교육생 교신을 정확성·간결성·완결성으로 채점하는 관제사 훈련 시뮬레이터 ASTRA.<sup class="c">5</sup><span class="ref" data-ref="appH">8</span></p></div>
+    </div>
+  </div>
+  <footer class="foot"><div class="abbr"><span><b>M&amp;S</b>모델링·시뮬레이션</span><span><b>신속원</b>국방신속획득기술연구원</span><span><b>신속상용화</b>민간 기술을 빠르게 군에 적용하는 사업</span></div>
+    <div class="cites"><span><b>1</b>국방전력발전업무훈령 별표 4 무기체계 세부분류</span><span><b>2</b>신속원, ’27-2차 신속시범사업 공모문</span><span><b>3</b>파이낸셜뉴스, 2026.10.20</span><span><b>4</b>Calian 사례 연구</span><span><b>5</b>arXiv 2606.18319, 2026.06</span></div></footer>
+</section></div>
+</div>
+<div id="scene-s12" class="scene-frame clip" data-composition-id="s12" data-start="44" data-duration="4" data-track-index="1" data-label="확장 경로" data-width="1920" data-height="1080">
+<div class="scale-box"><section class="slide ">
+  <h1 class="t">교육장에서 시작해 훈련장을 거쳐 실전으로 갑니다</h1>
+  <div class="body">
+    <div class="stages" style="margin-top:4px">
+      <div class="stg first"><img class="photo" src="assets/stage-class.jpg" alt="무전 교신 훈련 교실 (AI 생성 이미지)"><div class="bar-top"><span class="nn">1</span><h2>교육장</h2><p class="prod">AI 무전 교관</p>
+        <dl><dt>고객</dt><dd>정보통신학교, 부대 교육</dd><dt>쌓이는 데이터</dt><dd>정답 붙은 군 음성, 교육생 실수 유형</dd></dl></div></div>
+      <div class="arr"><svg width="40" height="24" viewBox="0 0 40 24" aria-hidden="true"><path d="M2 12H34M26 4l8 8-8 8" fill="none" stroke="#5C6860" stroke-width="2.5"/></svg>데이터와<br>모델</div>
+      <div class="stg"><img class="photo" src="assets/stage-field.jpg" alt="야외 훈련장에서 무전 교신하는 장병 (AI 생성 이미지)"><div class="bar-top"><span class="nn">2</span><h2>훈련장</h2><p class="prod">KCTC 무전 블랙박스</p>
+        <dl><dt>무엇을 하나</dt><dd>훈련 무전을 7필드로 정리해 교전 타임라인과 사후강평 리포트 작성</dd><dt>연결되는 흐름</dt><dd>KCTC AI 기반 전투분석체계 연구<sup class="c">1</sup></dd></dl></div></div>
+      <div class="arr"><svg width="40" height="24" viewBox="0 0 40 24" aria-hidden="true"><path d="M2 12H34M26 4l8 8-8 8" fill="none" stroke="#5C6860" stroke-width="2.5"/></svg>데이터와<br>모델</div>
+      <div class="stg"><img class="photo" src="assets/stage-command.jpg" alt="야전 지휘소에서 지도를 보는 장교들 (AI 생성 이미지)"><div class="bar-top"><span class="nn">3</span><h2>실전</h2><p class="prod">무전에서 C4I 보고로</p>
+        <dl><dt>무엇을 하나</dt><dd>무전 내용을 표준 보고서로 만들고, 사람이 승인하면 지휘통제체계로 전달</dd><dt>연결되는 흐름</dt><dd>1단계 로드맵의 TICN 운용환경 실증<sup class="c">2</sup></dd></dl></div></div>
+    </div>
+    <p class="muted" style="font-size:18px;margin:auto 0 14px">시점은 가안입니다. 사진은 AI 생성 이미지(Codex)이며 실제 장면이 아닙니다.<span class="ref" data-ref="appL">12</span></p>
+  </div>
+  <footer class="foot"><div class="abbr"><span><b>사후강평(AAR)</b>훈련 뒤 잘한 점과 잘못한 점을 짚는 검토</span><span><b>C4I</b>지휘·통제·통신·컴퓨터·정보 체계</span><span><b>TICN</b>전술정보통신체계</span></div>
+    <div class="cites"><span><b>1</b>뉴스1, 「KCTC, AI로 ‘승리 알고리즘’ 찾는다」, 2026.08.08</span><span><b>2</b>1단계 과제 신청서(제출본), 2026.07.31</span></div></footer>
+</section></div>
+</div>
+<div id="scene-s13" class="scene-frame clip" data-composition-id="s13" data-start="48" data-duration="4" data-track-index="1" data-label="실행 계획(안)" data-width="1920" data-height="1080">
+<div class="scale-box"><section class="slide ">
+  <h1 class="t">실행 계획<span class="flag">가안</span></h1>
+  <div class="body">
+    <div class="cols c2" style="margin-top:12px">
+      <div>
+        <p style="font-size:22px;font-weight:600;margin:0 0 14px">MVP 범위</p>
+        <ul class="mvp">
+          <li><b>시나리오 3종</b> 정찰 보고, 화력 요청, 의무후송 요청. 양식은 교범으로 확인<span class="ref" data-ref="appF">6</span></li>
+          <li><b>AI 역할자 음성</b> 합성 음성에 무전기 음질 효과</li>
+          <li><b>채점기</b> 1단계 7필드 위에 정답 대조<span class="ref" data-ref="appG">7</span></li>
+          <li><b>교관 콘솔</b> GCS Saker 화면 재사용</li>
+          <li><b>동작 환경</b> 1단계 서버 또는 GPU 워크스테이션, 내부망</li>
+        </ul>
+      </div>
+      <div>
+        <p style="font-size:22px;font-weight:600;margin:0 0 14px">일정</p>
+        <div class="tl">
+          <div class="d">2026.11</div><div>수요 확인(교관 인터뷰 3건), 경북창경·신속원 문의, 시나리오 초안. 신속시범 27-2차는 11/17 15:00 마감<sup class="c">2</sup></div>
+          <div class="d">2026.12</div><div>1단계 마무리 우선(12/31 종료<sup class="c">1</sup>). 시나리오 검수만 병행</div>
+          <div class="d">2027.1~2</div><div>MVP 개발 6~8주</div>
+          <div class="d">2027.3</div><div>교관 앞 시연, 2단계·후속 사업 제안 자료에 반영</div>
+        </div>
+      </div>
+    </div>
+    <p class="muted" style="font-size:19px;margin:auto 0 16px">자금 창구: K-방산 2단계(2027, 기업당 최대 5억 원<sup class="c">3</sup>), 신속시범사업, 국방부 신속상용화<span class="ref" data-ref="appJ">10</span></p>
+  </div>
+  <footer class="foot"><div class="abbr"><span><b>MVP</b>핵심 기능만 넣어 빨리 검증하는 첫 버전</span><span><b>신속시범사업</b>첨단기술을 2년 안에 시제품으로 만들어 군이 시범 운용하는 사업</span></div>
+    <div class="cites"><span><b>1</b>1단계 과제 신청서(제출본), 2026.07.31</span><span><b>2</b>신속원, ’27-2차 신속시범사업 공모문</span><span><b>3</b>머니투데이, 2026.04.27</span></div></footer>
+</section></div>
+</div>
+<div id="scene-appA" class="scene-frame clip" data-composition-id="appA" data-start="52" data-duration="4" data-track-index="1" data-label="부록 1. 용어·약어 사전" data-width="1920" data-height="1080">
+<div class="scale-box"><section class="slide app-sl">
+  <div class="top top-app"><span class="back-hint">‹ 버튼을 누르면 보던 장으로 돌아갑니다</span></div>
+  <h1 class="t">부록 1. 용어·약어 사전</h1>
+  <div class="body">
+    <div class="gloss">
+      <div><b>7필드</b><span>1단계 구조화 항목. 시간·좌표·명령·상황·부대명·표적명·자산명</span></div>
+      <div><b>AAR (사후강평)</b><span>After Action Review. 훈련 뒤 잘한 점과 잘못한 점을 짚는 검토</span></div>
+      <div><b>ASTRA</b><span>2026년 관제사 훈련 시뮬레이터 연구. AI가 조종사 역할을 맡고 교신을 채점</span></div>
+      <div><b>C4I</b><span>지휘·통제·통신·컴퓨터·정보 체계. 군 지휘통제 시스템 전체</span></div>
+      <div><b>CER / WER</b><span>문자 오류율 / 단어 오류율. 음성인식에서 틀린 글자·단어 비율, 낮을수록 정확</span></div>
+      <div><b>E2E</b><span>End-to-End. 입력부터 저장까지 전 구간</span></div>
+      <div><b>GCS</b><span>Ground Control Station. 지상통제·관제 화면. A4AI 제품명 GCS Saker</span></div>
+      <div><b>HAAWAII</b><span>유럽 항공관제 음성인식 연구 프로젝트(DLR·Idiap 등)</span></div>
+      <div><b>JTAC</b><span>합동 최종공격 통제관. 지상에서 항공기 화력을 유도하는 요원</span></div>
+      <div><b>KCCS</b><span>지휘통제정보공유체계. 합동·각 군 C4I의 데이터·서비스·단말을 클라우드 기반으로 통합하는 R&amp;D 사업</span></div>
+      <div><b>KCTC</b><span>육군 과학화전투훈련단</span></div>
+      <div><b>KJCCS</b><span>합동지휘통제체계</span></div>
+      <div><b>KPI</b><span>핵심 성과 지표</span></div>
+      <div><b>M&amp;S</b><span>모델링·시뮬레이션. 국방M&amp;S체계는 무기체계 분류의 한 갈래</span></div>
+      <div><b>Macro F1</b><span>항목별 정확도(F1)의 평균. 1단계 7필드 분류 성능 지표</span></div>
+      <div><b>MILES</b><span>다중통합레이저교전체계. KCTC의 레이저 교전 장비</span></div>
+      <div><b>MVP</b><span>핵심 기능만 넣어 빨리 검증하는 첫 버전</span></div>
+      <div><b>P95</b><span>95백분위. 100번 중 95번이 이 값 안에 든다는 뜻</span></div>
+      <div><b>SIP / RTP</b><span>인터넷전화의 통화 연결 규약 / 음성 전송 규약</span></div>
+      <div><b>SPAN</b><span>스위치 포트 미러링. 통화에 끼어들지 않고 트래픽을 복제해 받는 방식</span></div>
+      <div><b>STT</b><span>Speech-to-Text. 음성을 텍스트로 바꾸는 기술</span></div>
+      <div><b>TICN</b><span>전술정보통신체계</span></div>
+      <div><b>TMMR</b><span>전술다대역다기능무전기</span></div>
+      <div><b>TTS</b><span>Text-to-Speech. 텍스트를 음성으로 합성하는 기술</span></div>
+      <div><b>Whisper</b><span>공개 음성인식 모델. 1단계 STT의 기반</span></div>
+      <div><b>경북창경</b><span>경북창조경제혁신센터. K-방산 스타트업 1단계 운영기관</span></div>
+      <div><b>국방전략기술</b><span>신속시범사업 공모 분야인 10대 국방전략기술</span></div>
+      <div><b>관찰통제관</b><span>훈련 중 부대를 관찰·평가하는 요원</span></div>
+      <div><b>복창</b><span>받은 지시를 그대로 되받아 말해 확인하는 절차</span></div>
+      <div><b>신속원</b><span>국방신속획득기술연구원(국방과학연구소 부설). 신속시범사업 주관</span></div>
+      <div><b>신속시범사업</b><span>첨단기술을 2년 안에 시제품으로 만들어 군이 시범 운용하는 사업</span></div>
+      <div><b>신속상용화</b><span>민간 기술을 빠르게 군에 적용하는 사업</span></div>
+      <div><b>온프레미스</b><span>외부 인터넷 없이 현장 내부망에 설치해 운용하는 방식</span></div>
+      <div><b>정규화</b><span>“일사 공 공”과 “1400”처럼 다른 표기를 하나로 맞추는 처리</span></div>
+      <div><b>플라이휠</b><span>쓰일수록 데이터가 쌓이고 성능이 올라 더 많이 쓰이는 선순환</span></div>
+    </div>
+  </div>
+  <footer class="foot"><div class="abbr"><span>KCCS 정의 출처: 방위사업청 예비설명회(2차) 공고, 2026.10.06</span></div></footer>
+</section></div>
+</div>
+<div id="scene-appB" class="scene-frame clip" data-composition-id="appB" data-start="56" data-duration="4" data-track-index="1" data-label="부록 2. 1단계 과제 요약" data-width="1920" data-height="1080">
+<div class="scale-box"><section class="slide app-sl">
+  <div class="top top-app"><span class="back-hint">‹ 버튼을 누르면 보던 장으로 돌아갑니다</span></div>
+  <h1 class="t">부록 2. 1단계 과제 요약</h1>
+  <p class="sub">K-방산 스타트업 1단계 육성사업 과제 신청서(제출본) 기준</p>
+  <div class="body">
+    <div style="display:grid;grid-template-columns:1fr 1.15fr;gap:32px">
+      <div style="display:grid;gap:12px;align-content:start">
+        <div class="box"><h2>개요</h2>
+          <p>과제명: 전장 음성 데이터화 모듈 시제품 제작 기반 선행연구</p>
+          <p>기간: 2026.07.15~12.31 (5개월)</p>
+          <p>사업비: 총 80백만 원 (정부 60, 현금 2, 현물 18)</p>
+          <p>결과물: 19인치 2U AI 기능검증 서버 1식</p></div>
+        <div class="box"><h2>서버 사양 (목표)</h2>
+          <p>GPU VRAM 48GB 이상, RAM 64GB 이상, 저장장치 8TB 이상</p>
+          <p>10GbE SFP+ 수집 포트 2, 1GbE RJ45 관리 포트 2, 수집망·관리망 분리</p></div>
+        <div class="box"><h2>소프트웨어 처리 순서</h2>
+          <ol><li>파일·시험망 입력 어댑터, 조건부 SPAN 시험</li><li>SIP/Call-ID 세션 식별, RTP 양방향 복원</li><li>Whisper 기반 온프레미스 STT</li><li>군 용어·숫자·좌표·문맥 보정</li><li>7필드 구조화</li><li>신뢰도 표시, 운용자 확인·수정·승인</li><li>원음·원문·보정문·필드·승인이력의 통화단위 DB 저장</li></ol></div>
+      </div>
+      <div style="display:grid;gap:12px;align-content:start">
+        <table class="tbl xs">
+          <thead><tr><th>KPI</th><th>목표</th><th>비중</th></tr></thead>
+          <tbody>
+            <tr><td>핵심 개체 인식 (군 용어, 숫자, 좌표, 호출부호)</td><td>baseline 대비 오류 20% 이상 감소, 과보정률 3% 이하</td><td>20</td></tr>
+            <tr><td>STT 원문 정확도 (CER)</td><td>baseline 대비 5% 이상 감소</td><td>15</td></tr>
+            <tr><td>7필드 분류 정확도 (Macro F1)</td><td>70% 이상</td><td>35</td></tr>
+            <tr><td>구간별 처리 지연</td><td>발화 종료 후 5초 이내 (P95)</td><td>20</td></tr>
+            <tr><td>결과 추적성</td><td>90% 이상</td><td>10</td></tr>
+          </tbody>
+        </table>
+        <div class="box"><h2>산출물</h2><p>V-01 한국어 군용 음성 인식 오류 유형 보고서, V-02 음질·소음 조건별 저하 요인, V-03 구간별 처리지연, V-04 7필드 정의 및 성능, V-05 GCS 대시보드 UI, V-06 2단계 성능지표 후보 및 실증방식</p></div>
+        <div class="box"><h2>로드맵</h2><p>신청서: 1단계 기능검증 서버, 2단계 보안형 전술 음성 의사결정 지원 AI 서버, 3단계 TICN 운용환경 실증형 전술 음성 AI 서버. 7/20 회의: 2단계는 실제 국방 단말 연동, 3단계는 다단말·대용량 처리로 강화.</p></div>
+      </div>
+    </div>
+  </div>
+  <footer class="foot"><div class="abbr"></div>
+    <div class="cites"><span><b>1</b>K-방산 스타트업 1단계 과제 신청서(제출본), 2026.07.31</span><span><b>2</b>개발팀 회의록(프로젝트 현황·로드맵 점검), 2026.07.20</span></div></footer>
+</section></div>
+</div>
+<div id="scene-appC" class="scene-frame clip" data-composition-id="appC" data-start="60" data-duration="4" data-track-index="1" data-label="부록 3. 데이터 근거 상세" data-width="1920" data-height="1080">
+<div class="scale-box"><section class="slide app-sl">
+  <div class="top top-app"><span class="back-hint">‹ 버튼을 누르면 보던 장으로 돌아갑니다</span></div>
+  <h1 class="t">부록 3. 데이터가 성능을 결정한다는 근거</h1>
+  <div class="body">
+    <table class="tbl sm" style="margin-top:4px">
+      <thead><tr><th style="width:20%">연구</th><th style="width:15%">대상</th><th style="width:43%">결과 (원문 확인)</th><th>시사점</th></tr></thead>
+      <tbody>
+        <tr><td>국방대학교 차현우·마정목 (2024)<sup class="c">1</sup></td><td>한국어 군사용어</td><td>현역 장교 10명이 교범·용어사전·간행물을 읽어 녹음한 음성으로 Whisper를 각 10시간 학습. CER: 기존 13.68%, 용어사전 12.36%, 간행물 8.42%, 교범 7.94%. 군사용어는 특수 용어가 많아 추가 학습이 필요하다고 밝힘</td><td>전술 맥락이 담긴 데이터가 성능을 가장 크게 올림</td></tr>
+        <tr><td>Embry-Riddle 항공대 (2026)<sup class="c">2</sup></td><td>항공 무선 교신 (미국 12개 공항)</td><td>시판 STT 단어 오류율 80%, 맞춤화 후 15% 미만. 용어 표준화, 호출부호·숫자 정리, 교신 오류 식별 포함</td><td>도메인 맞춤이 성능 차이를 만듦</td></tr>
+        <tr><td>ASTRA (2026, arXiv)<sup class="c">3</sup></td><td>관제사 훈련 (싱가포르)</td><td>시판 모델 단어 오류율 최대 107.80%, 맞춤 학습 후 23.45%. 교육생 교신을 정확성·간결성·완결성으로 채점</td><td>교신 훈련 자동 채점은 연구로 시도된 방향</td></tr>
+        <tr><td>HAAWAII, DLR·Idiap 등 (2021)<sup class="c">4</sup></td><td>항공관제 복창</td><td>단어 단위 대조는 매우 비효율적이었고, 의미(개념) 단위 대조가 오인식에도 더 견고</td><td>7필드처럼 항목 단위로 채점</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <footer class="foot"><div class="abbr"></div>
+    <div class="cites"><span><b>1</b>한국산학기술학회논문지 25(3) pp.102-107, 2024</span><span><b>2</b>AIN, “Embry-Riddle Enhances Aviation Radio Comms with AI”, 2026</span><span><b>3</b>arXiv 2606.18319, 2026.06</span><span><b>4</b>Helmke 외, “Readback Error Detection by Automatic Speech Recognition to Increase ATM Safety”, ATM2021</span></div></footer>
+</section></div>
+</div>
+<div id="scene-appD" class="scene-frame clip" data-composition-id="appD" data-start="64" data-duration="4" data-track-index="1" data-label="부록 4. 군 음성 데이터 현황" data-width="1920" data-height="1080">
+<div class="scale-box"><section class="slide app-sl">
+  <div class="top top-app"><span class="back-hint">‹ 버튼을 누르면 보던 장으로 돌아갑니다</span></div>
+  <h1 class="t">부록 4. 군 음성 데이터를 직접 만들어 써 온 사례</h1>
+  <div class="body">
+    <table class="tbl sm" style="margin-top:4px">
+      <thead><tr><th style="width:16%">경로</th><th>확인한 내용</th></tr></thead>
+      <tbody>
+        <tr><td>실전 무전</td><td>1단계는 승인 파일과 가상 SIP/RTP 시험망이 기본 입력이고, 교환기 SPAN 입력은 승인된 시험환경이 확보될 때만 시험. 실제 TICN 운용망 직접 연동은 후속 범위. 음성·구조화 데이터는 민감정보로 보고 암호화·접근권한·반출통제를 정의<sup class="c">1</sup></td></tr>
+        <tr><td>연구용 데이터</td><td>국방 표준 자연어 데이터셋 구축사업으로 구축한 데이터로, 현역 장교 10명(육군 소령 2, 육군 대위 3, 해군 대위 2, 공군 대위 2, 해병 대위 1)이 군사 교범·용어사전·간행물을 읽어 녹음<sup class="c">2</sup></td></tr>
+        <tr><td>KCTC</td><td>‘AI 활용 KCTC 훈련체계 발전 연구’ 용역 발주. 교전 데이터, 장병 위치, 사격 기록, 영상·음성 등이 데이터베이스와 백업매체에 흩어져 있고 AI 학습용 정제 도구가 없음<sup class="c">3</sup></td></tr>
+        <tr><td>국방 차원</td><td>국방AI데이터센터 구축 정보화전략계획(ISP) 사전규격 공개. 각 군과 기관에 흩어진 데이터를 ‘국방AI데이터허브’로 수집·저장·품질관리하는 구상<sup class="c">4</sup></td></tr>
+        <tr><td>사내 경험</td><td>VCM 과제: 외부 출처 음원은 이용 조건과 재배포 범위를 먼저 확인하고, 어려우면 라이선스가 명확한 음원을 우선 사용<sup class="c">5</sup></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <footer class="foot"><div class="abbr"><span><b>ISP</b>정보화 사업의 사전 설계</span><span><b>VCM</b>A4AI의 음성 소음 저감 과제</span></div>
+    <div class="cites"><span><b>1</b>1단계 과제 신청서(제출본), 2026.07.31</span><span><b>2</b>한국산학기술학회논문지 25(3), 2024</span><span><b>3</b>뉴스1, 2026.08.08</span><span><b>4</b>전자신문, 「육·해·공에 흩어진 GPU 통합…국방AI데이터센터 밑그림 착수」, 2026.10.25</span><span><b>5</b>개발팀 회의록, 2026.07.20</span></div></footer>
+</section></div>
+</div>
+<div id="scene-appE" class="scene-frame clip" data-composition-id="appE" data-start="68" data-duration="4" data-track-index="1" data-label="부록 5. 국방 AI·예산 동향" data-width="1920" data-height="1080">
+<div class="scale-box"><section class="slide app-sl">
+  <div class="top top-app"><span class="back-hint">‹ 버튼을 누르면 보던 장으로 돌아갑니다</span></div>
+  <h1 class="t">부록 5. 국방 AI·예산 동향</h1>
+  <div class="body">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:4px">
+      <div>
+        <p class="chart-title">AI 관련 국방예산, 2026년 대비 2027년 정부안 (억 원)<sup class="c">1</sup></p>
+        <div class="lgd"><span><i style="background:var(--bar-1)"></i>2026년</span><span><i style="background:var(--bar-2)"></i>2027년 정부안</span></div>
+        <div class="chart" data-chart='{"max":9000,"ticks":[0,3000,6000,9000],"unit":"억","labelW":200,"barH":30,"gap":26,"fmt":"comma","rows":[{"label":"AI·유무인 복합체계","values":[4968,7727],"tips":["2026년 4,968억 원","2027년 정부안 7,727억 원"]},{"label":"드론·대드론","values":[6788,8061],"tips":["2026년 6,788억 원","2027년 정부안 8,061억 원"]}]}'></div>
+        <p class="chart-title" style="margin-top:22px">방산 수출 수주액 (억 달러)<sup class="c">2</sup></p>
+        <div class="chart" data-chart='{"max":160,"ticks":[0,40,80,120,160],"unit":"","labelW":200,"barH":26,"gap":14,"rows":[{"label":"2023년","values":[135],"c":1},{"label":"2024년","values":[96],"c":1},{"label":"2025년","values":[154],"c":1},{"label":"2026년 7월 말 기준","values":[80],"c":0,"partial":true,"note":"약 80"}]}'></div>
+        <p class="note" style="margin-top:4px">2026년은 7월 말까지 누계라 다른 해와 바로 비교할 수 없습니다(빗금).</p>
+      </div>
+      <table class="tbl xs">
+        <thead><tr><th style="width:22%">항목</th><th>내용</th></tr></thead>
+        <tbody>
+          <tr><td>국방예산</td><td>2026년 65조 8,642억 원 확정<sup class="c">3</sup>. 2027년 정부안 73조 2,777억 원(전년 대비 8.2%, 총지출 기준)으로 처음 70조 원 돌파<sup class="c">1</sup></td></tr>
+          <tr><td>AI·무인</td><td>피지컬 AI 실증 430억 원 신규<sup class="c">1</sup>. 교육용 상용드론 1만7000여 대 구매에 500억 원<sup class="c">4</sup></td></tr>
+          <tr><td>국방 AX</td><td>10/22 국방인공지능 추진평가 회의. 비전 ‘소버린 AI 기반의 자주적 첨단강군 건설’. 거점 5곳: 합참 용산(지휘통제 AI), 육군 판교(피지컬 AI), 대전(에이전틱 AI), 해군·해병대 부산(해양 AX), 공군 양재(항공우주 AX)<sup class="c">5</sup></td></tr>
+          <tr><td>지휘통제</td><td>KCCS 3단계 추진 예정, 초거대 인공지능 기반 지휘통제체계 기술 개발 사업 242억 원(2026.9~2030.2, 42개월)<sup class="c">6</sup>. KJCCS 경미한 성능개량(460억 3,500만 원) 우선협상대상자 LIG시스템 컨소시엄, 삼성SDS 합류<sup class="c">7</sup></td></tr>
+          <tr><td>스타트업</td><td>2030년까지 방산 참여 스타트업 100개 사 육성 목표<sup class="c">8</sup></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <footer class="foot"><div class="abbr"></div>
+    <div class="cites"><span><b>1</b>인공지능신문, 2026.09.03</span><span><b>2</b>서울경제, 「K-방산, 수출 부진에 ‘방산 빅4’ 수주잔고 감소세」, 2026.08.14</span><span><b>3</b>굿모닝충청, 2025.12.03</span><span><b>4</b>뉴스핌, 2026.09.01</span><span><b>5</b>한국사회복지저널, 2026.10.22</span><span><b>6</b>폴리뉴스, 2026.09.28</span><span><b>7</b>전자신문, 2026.10.07</span><span><b>8</b>정책브리핑(중기부·방사청), 2026.02.23</span></div></footer>
+</section></div>
+</div>
+<div id="scene-appF" class="scene-frame clip" data-composition-id="appF" data-start="72" data-duration="4" data-track-index="1" data-label="부록 6. 시나리오 설계 틀(안)" data-width="1920" data-height="1080">
+<div class="scale-box"><section class="slide app-sl">
+  <div class="top top-app"><span class="back-hint">‹ 버튼을 누르면 보던 장으로 돌아갑니다</span></div>
+  <h1 class="t">부록 6. 시나리오 설계 틀<span class="flag">가안</span></h1>
+  <p class="sub">채점 항목은 1단계 7필드에 맞춰 설계합니다. 실제 보고 양식과 용어는 교범과 과제책임자 검수로 확정합니다.</p>
+  <div class="body">
+    <table class="tbl sm">
+      <thead><tr><th style="width:18%">MVP 시나리오</th><th style="width:24%">역할</th><th>정답으로 둘 7필드 (설계안)</th></tr></thead>
+      <tbody>
+        <tr><td>정찰 보고</td><td>교육생: 정찰조<br>AI: 중대 상황실</td><td>시간, 좌표, 상황, 표적명, 자산명</td></tr>
+        <tr><td>화력 요청</td><td>교육생: 관측자<br>AI: 사격지휘</td><td>좌표, 표적명, 명령, AI 지시 복창</td></tr>
+        <tr><td>의무후송 요청</td><td>교육생: 소대<br>AI: 대대 상황실</td><td>좌표, 상황, 부대명, 시간</td></tr>
+      </tbody>
+    </table>
+    <div class="card" style="margin-top:16px">
+      <h2>화면 예시 (가상)</h2>
+      <p class="tx"><span class="who">AI 상황실</span>“한빛, 여기는 상황실. 관측 내용 보고하라. 이상.” &nbsp; <span class="who">교육생</span>“상황실, 여기는 한빛. <span class="hl">14시 20분</span>, 좌표 <span class="hl">CH 1234 5678</span>, <span class="hl">적 보병 분대</span>, <span class="hl">북쪽으로 이동 중</span>. 이상.”</p>
+      <div class="score">정답 필드 5개 중 4개 확인, 자산명 <span class="miss">누락</span>. 시나리오 하나에 좌표·시간·규모 같은 변수를 바꿔 여러 문제를 만들 수 있습니다.</div>
+    </div>
+  </div>
+  <footer class="foot"><div class="abbr"><span>호출부호, 좌표, 교신 내용은 모두 가상입니다</span></div></footer>
+</section></div>
+</div>
+<div id="scene-appG" class="scene-frame clip" data-composition-id="appG" data-start="76" data-duration="4" data-track-index="1" data-label="부록 7. 채점 기준(안)" data-width="1920" data-height="1080">
+<div class="scale-box"><section class="slide app-sl">
+  <div class="top top-app"><span class="back-hint">‹ 버튼을 누르면 보던 장으로 돌아갑니다</span></div>
+  <h1 class="t">부록 7. 채점 기준<span class="flag">가안</span></h1>
+  <div class="body">
+    <table class="tbl sm" style="margin-top:4px">
+      <thead><tr><th style="width:17%">항목</th><th style="width:24%">무엇을 보나</th><th style="width:34%">어떻게 판정하나</th><th>1단계에서 가져오는 것</th></tr></thead>
+      <tbody>
+        <tr><td>필수 항목 완결성</td><td>시나리오가 요구한 항목이 다 나왔나</td><td>7필드 추출 결과를 시나리오 정답 항목과 비교</td><td>7필드 구조화 모듈</td></tr>
+        <tr><td>숫자·좌표 정확도</td><td>시간, 좌표, 수량이 맞나</td><td>표기를 정규화한 뒤 정답과 일치 여부 비교</td><td>숫자·좌표 정규화 규칙</td></tr>
+        <tr><td>복창 정확도</td><td>AI 지시를 맞게 되받았나</td><td>단어가 아니라 항목(의미) 단위로 대조<sup class="c">1</sup></td><td>군 용어·문맥 보정</td></tr>
+        <tr><td>절차 준수</td><td>호출부호, 시작·종료 용어의 순서</td><td>규칙 기반 검사</td><td>군 용어 사전</td></tr>
+        <tr><td>응답 시간</td><td>호출부터 응답까지</td><td>발화 시작·종료 타임스탬프</td><td>구간별 처리지연 측정</td></tr>
+        <tr><td>간결성</td><td>필요한 말만 했나</td><td>발화 길이 대비 필수 항목 비율<sup class="c">2</sup></td><td>없음 (신규)</td></tr>
+      </tbody>
+    </table>
+    <div class="box" style="margin-top:14px"><h2>판정 원칙</h2><p>확신이 낮은 판정은 자동으로 확정하지 않고 교관 확인으로 넘깁니다. 1단계의 ‘모델 출력은 사람이 승인한다’ 원칙과 같습니다.<sup class="c">3</sup> 항목별 배점은 교관 인터뷰 후 정합니다.</p></div>
+  </div>
+  <footer class="foot"><div class="abbr"><span><b>타임스탬프</b>발화 시각 기록</span></div>
+    <div class="cites"><span><b>1</b>Helmke 외, ATM2021 (HAAWAII): 단어 단위 대조는 비효율, 개념 단위 대조가 견고</span><span><b>2</b>arXiv 2606.18319 (ASTRA): 정확성·간결성·완결성 채점</span><span><b>3</b>1단계 과제 신청서(제출본), 2026.07.31</span></div></footer>
+</section></div>
+</div>
+<div id="scene-appH" class="scene-frame clip" data-composition-id="appH" data-start="80" data-duration="4" data-track-index="1" data-label="부록 8. 유사 사례" data-width="1920" data-height="1080">
+<div class="scale-box"><section class="slide app-sl">
+  <div class="top top-app"><span class="back-hint">‹ 버튼을 누르면 보던 장으로 돌아갑니다</span></div>
+  <h1 class="t">부록 8. 유사 사례</h1>
+  <p class="sub">음성인식으로 교신 절차를 훈련하거나 채점한 사례와, 국내 AI 훈련 시뮬레이터 예산 선례입니다.</p>
+  <div class="body">
+    <table class="tbl sm">
+      <thead><tr><th style="width:20%">사례</th><th style="width:18%">누가·언제</th><th style="width:38%">내용 (원문 확인)</th><th>우리와 다른 점</th></tr></thead>
+      <tbody>
+        <tr><td>JTAC VR 훈련기<sup class="c">1</sup></td><td>Calian, 캐나다군 (국가연구위원회가 연구 지원)</td><td>음성인식과 VR을 결합. 교육생이 외워야 하는 화력 요청 무전 절차를 훈련하고, 교육생의 음성 응답을 인식</td><td>항공 화력 유도 한정, 영어</td></tr>
+        <tr><td>ASTi SERA<sup class="c">2</sup></td><td>미 해안경비대, 2020년 발표</td><td>MH-65E 조종석 절차 훈련기에 AI 역할자를 통합할 예정이며, 맞춤 무선 용어에 맞게 음성인식을 수정</td><td>항공 교신, 도입 예정 발표 기준</td></tr>
+        <tr><td>ASTRA<sup class="c">3</sup></td><td>연구, 2026.06</td><td>관제사 훈련의 조종사 역할을 자동화. 교육생 교신을 정확성·간결성·완결성으로 평가</td><td>연구 단계, 항공 관제</td></tr>
+        <tr><td>AI 대드론 훈련 시뮬레이터<sup class="c">4</sup></td><td>버넥트 컨소시엄, 2026.10</td><td>국방부 개발 및 신속상용화 지원사업. 12개월, 정부지원금 20억 원. 500MB 이하 경량 AI 모델을 현장 PC에서 실행</td><td>VR·MR 대드론 훈련, 음성 교신 아님</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <footer class="foot"><div class="abbr"><span><b>JTAC</b>합동 최종공격 통제관</span></div>
+    <div class="cites"><span><b>1</b>Calian 사례 연구(게시일 미표기)</span><span><b>2</b>Halldale, “ASTi to Integrate Simulated ATC System into Coast Guard Flight Simulator”, 2020.07.07</span><span><b>3</b>arXiv 2606.18319</span><span><b>4</b>파이낸셜뉴스, 2026.10.20</span></div></footer>
+</section></div>
+</div>
+<div id="scene-appI" class="scene-frame clip" data-composition-id="appI" data-start="84" data-duration="4" data-track-index="1" data-label="부록 9. 무기체계 분류 근거" data-width="1920" data-height="1080">
+<div class="scale-box"><section class="slide app-sl">
+  <div class="top top-app"><span class="back-hint">‹ 버튼을 누르면 보던 장으로 돌아갑니다</span></div>
+  <h1 class="t">부록 9. 무기체계 분류 근거</h1>
+  <p class="sub">국방전력발전업무훈령 별표 4 「무기체계 세부분류」 발췌</p>
+  <div class="body">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:26px">
+      <div style="display:grid;gap:14px;align-content:start">
+        <div class="box"><h2>AI 무전 교관 관련 항목</h2><p style="margin-bottom:8px">10. 그 밖의 무기체계 &gt; 국방M&amp;S체계 &gt; 전술훈련모의장비</p>
+          <p class="quote">K계열전차소부대전술모의훈련장비, P-3 및 Lynx/AW-159모의훈련장비, 전투기·수송기·훈련기 모의비행훈련장비, 비행환경적응훈련장비, 전자전훈련장비, 공중전투기동훈련체계 등</p></div>
+        <div class="box"><h2>주의</h2><p>신속시범사업은 무기체계로 분류 가능한 시제품만 대상이며, 판단은 신속원이 합니다. 수요신청서 제출 전 사전 문의를 권합니다.</p></div>
+      </div>
+      <div style="display:grid;gap:14px;align-content:start">
+        <div class="box"><h2>확장 경로(훈련장·실전) 관련 항목</h2>
+          <p>1. 지휘통제·통신 &gt; 지휘통신체계 &gt; 전술통신체계: 전술지휘통신체계(SPIDER), 전술정보지휘통신체계(TICN) 등</p>
+          <p style="margin-top:6px">1. 지휘통제·통신 &gt; 통신장비 &gt; 그 밖의 통신장비: 정보·보안장비 등</p>
+          <p style="margin-top:6px">비고: 무기체계의 구성장비인 상용정보통신장비는 무기체계로 분류</p></div>
+        <div class="box"><h2>10대 국방전략기술 (신속시범 공모 분야)</h2><p>인공지능, 유·무인 복합, 양자, 우주, 에너지, 첨단소재, 사이버·네트워크, 센서·전자기전, 추진, WMD 대응</p></div>
+      </div>
+    </div>
+  </div>
+  <footer class="foot"><div class="abbr"><span><b>M&amp;S</b>모델링·시뮬레이션</span><span><b>WMD</b>대량살상무기</span></div>
+    <div class="cites"><span><b>1</b>국방전력발전업무훈령 별표 4 (공모문 붙임 2)</span><span><b>2</b>신속원, ’27-2차 신속시범사업 공모문</span></div></footer>
+</section></div>
+</div>
+<div id="scene-appJ" class="scene-frame clip" data-composition-id="appJ" data-start="88" data-duration="4" data-track-index="1" data-label="부록 10. 지원사업 창구 상세" data-width="1920" data-height="1080">
+<div class="scale-box"><section class="slide app-sl">
+  <div class="top top-app"><span class="back-hint">‹ 버튼을 누르면 보던 장으로 돌아갑니다</span></div>
+  <h1 class="t">부록 10. 지원사업 창구 상세</h1>
+  <div class="body">
+    <div style="display:grid;grid-template-columns:1fr 1.25fr 1fr;gap:20px;margin-top:4px">
+      <div class="box"><h2>K-방산 스타트업 육성사업</h2><ul>
+        <li>2단계 2027년: 기업당 최대 5억 원<sup class="c">1</sup></li>
+        <li>3단계 2028년: 기업당 최대 21억 원<sup class="c">1</sup></li>
+        <li>1단계 성과 평가를 거쳐 도전<sup class="c">1</sup></li>
+        <li>정부 목표: 2030년까지 방산 참여 스타트업 100개 사<sup class="c">2</sup></li>
+        <li><b>확인 필요:</b> 2단계에서 과제 방향 변경 가능 여부</li></ul></div>
+      <div class="box"><h2>신속시범사업 ’27-2차<sup class="c">3</sup></h2><ul>
+        <li>사업비 500억 원 미만, 시제개발 2년 이내</li>
+        <li>무기체계로 분류 가능한 시제품, 10대 국방전략기술 중심</li>
+        <li>공모 2026.10.12~11.17 15:00, 수요신청서 10쪽 이내, 이메일 접수</li>
+        <li>중소기업 전용 Track은 드론 무기체계만</li>
+        <li>절차: 접수, 검토(1~2개월), 조사분석(2~3개월), 대상 선정(방사청, 1개월), 입찰공고 준비(1개월), 입찰(40일), 제안서 평가(1개월), 수행기관 선정(1개월)</li>
+        <li><b>주의:</b> 대상사업 선정 후 수행기관은 경쟁입찰 등 별도 절차로 선정</li></ul></div>
+      <div class="box"><h2>국방부 신속상용화 (선례)</h2><ul>
+        <li>‘AI 기반 VR·MR 대드론 훈련 시뮬레이터 개발 및 신속상용화 지원사업’<sup class="c">4</sup></li>
+        <li>버넥트 컨소시엄, 12개월, 정부지원금 20억 원<sup class="c">4</sup></li>
+        <li>버넥트 배정 7억 2,000만 원<sup class="c">5</sup></li></ul>
+        <p style="margin-top:12px"><b>참고:</b> 지휘통제정보공유체계(R&amp;D) 예비설명회 11/24 과천. 참석 신청은 10/16 마감<sup class="c">6</sup></p></div>
+    </div>
+  </div>
+  <footer class="foot"><div class="abbr"></div>
+    <div class="cites"><span><b>1</b>머니투데이, 2026.04.27</span><span><b>2</b>정책브리핑, 2026.02.23</span><span><b>3</b>신속원, ’27-2차 신속시범사업 공모문</span><span><b>4</b>파이낸셜뉴스, 2026.10.20</span><span><b>5</b>뷰어스, 2026.10.24</span><span><b>6</b>방위사업청 예비설명회(2차) 공고, 2026.10.06</span></div></footer>
+</section></div>
+</div>
+<div id="scene-appK" class="scene-frame clip" data-composition-id="appK" data-start="92" data-duration="4" data-track-index="1" data-label="부록 11. 리스크 상세 대응표" data-width="1920" data-height="1080">
+<div class="scale-box"><section class="slide app-sl">
+  <div class="top top-app"><span class="back-hint">‹ 버튼을 누르면 보던 장으로 돌아갑니다</span></div>
+  <h1 class="t">부록 11. 리스크 상세 대응표<span class="flag">담당·시점은 가안</span></h1>
+  <div class="body">
+    <table class="tbl xs" style="margin-top:4px">
+      <thead><tr><th style="width:15%">리스크</th><th style="width:17%">영향</th><th style="width:40%">확인·대응 방법</th><th style="width:14%">담당(안)</th><th>시점(안)</th></tr></thead>
+      <tbody>
+        <tr><td>실제 수요</td><td>사업성 전체</td><td>정보통신학교·부대 교관 인터뷰 3건. 확인 항목: 상대역 부담, 채점 방식, 기록 여부, 연간 교육 인원</td><td>미정 (오늘 결정)</td><td>11월 둘째 주</td></tr>
+        <tr><td>시나리오 품질</td><td>채점 신뢰도</td><td>교범 기반 초안, 과제책임자 검수, 교관 리뷰 3단계</td><td>과제책임자</td><td>MVP 착수 전</td></tr>
+        <tr><td>교육생 발화 인식</td><td>오채점</td><td>내부 인원 10명 녹음 시험, 항목 단위 대조, 확신 낮은 판정은 교관 확인</td><td>음성 담당</td><td>MVP 개발 중</td></tr>
+        <tr><td>지원사업 경로</td><td>자금</td><td>경북창경에 2단계 방향 변경 가능 여부 문의. 안 되면 신속시범·신속상용화</td><td>미정</td><td>11월 첫째 주</td></tr>
+        <tr><td>무기체계 분류</td><td>신속시범 자격</td><td>신속원 신속획득연구팀 사전 문의</td><td>미정</td><td>11/17 이전</td></tr>
+        <tr><td>교범 보안</td><td>시나리오 범위</td><td>공개 범위로 MVP를 만들고, 비공개 시나리오는 고객이 현장 내부망에서 직접 작성하는 구조</td><td>설계 담당</td><td>설계 단계</td></tr>
+        <tr><td>음질 차이</td><td>실전 적용 시 성능</td><td>무전기 음질·전장 잡음 합성으로 증강. 훈련장 단계에서 실제 훈련 무전으로 보강</td><td>음성 담당</td><td>MVP 이후</td></tr>
+        <tr><td>인력 병행</td><td>1단계·타 과제 지연</td><td>11~12월은 확인·시나리오 작업만, 개발은 1단계 종료 후</td><td>PM</td><td>상시</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <footer class="foot"><div class="abbr"><span><b>PM</b>프로젝트 관리 담당</span><span>이 표는 A4AI 내부 계획(가안)입니다</span></div></footer>
+</section></div>
+</div>
+<div id="scene-appL" class="scene-frame clip" data-composition-id="appL" data-start="96" data-duration="4" data-track-index="1" data-label="부록 12. 확장 경로 상세" data-width="1920" data-height="1080">
+<div class="scale-box"><section class="slide app-sl">
+  <div class="top top-app"><span class="back-hint">‹ 버튼을 누르면 보던 장으로 돌아갑니다</span></div>
+  <h1 class="t">부록 12. 확장 경로 상세<span class="flag">시점은 가안</span></h1>
+  <div class="body">
+    <table class="tbl xs" style="margin-top:4px">
+      <thead><tr><th style="width:13%">단계</th><th style="width:15%">고객</th><th style="width:19%">쌓이는 데이터</th><th style="width:20%">추가 기술</th><th>연결되는 근거</th></tr></thead>
+      <tbody>
+        <tr><td>1 교육장<br>AI 무전 교관</td><td>정보통신학교, 부대 교육</td><td>정답 붙은 군 음성, 교육생 실수 유형</td><td>시나리오 엔진, AI 역할자 음성, 채점기</td><td>1단계 저장 데이터를 2단계 학습·평가에 쓰는 계획<sup class="c">1</sup></td></tr>
+        <tr><td>2 훈련장<br>KCTC 무전 블랙박스</td><td>KCTC, 과학화훈련장</td><td>실제 훈련 무전, 교전 타임라인</td><td>다채널 처리, 교전 데이터 결합, 사후강평 리포트</td><td>KCTC ‘AI 활용 훈련체계 발전 연구’, 훈련 종료와 동시에 사후검토 제공 방안 연구 예정<sup class="c">2</sup>. KCTC 성능개량은 아이티센엔텍 주관 486억 원 계약<sup class="c">3</sup></td></tr>
+        <tr><td>3 실전<br>무전에서 C4I 보고로</td><td>지휘소, C4I 체계업체</td><td>보안망 안의 실전 무전</td><td>보안 인증, C4I 메시지 연동</td><td>1단계 로드맵의 3단계 TICN 운용환경 실증<sup class="c">1</sup></td></tr>
+      </tbody>
+    </table>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:14px">
+      <div class="box"><h2>데이터가 넘어가는 방식 (계획)</h2><p>교육장의 정답 데이터로 다듬은 인식·채점 모델이 훈련장 무전의 1차 라벨러가 되고, 훈련장의 실제 무전은 실전 모델의 학습 재료가 됩니다.</p></div>
+      <div class="box"><h2>원칙 유지</h2><p>모든 단계에서 모델 출력은 사람이 승인하고, 자동 명령 생성·수행은 포함하지 않습니다.<sup class="c">1</sup></p></div>
+    </div>
+  </div>
+  <footer class="foot"><div class="abbr"><span><b>라벨러</b>데이터에 정답 표시를 붙이는 역할</span></div>
+    <div class="cites"><span><b>1</b>1단계 과제 신청서(제출본), 2026.07.31</span><span><b>2</b>뉴스1, 2026.08.08</span><span><b>3</b>뉴스웨이, 「한컴라이프케어, 육군 훈련 시스템 성능개량 사업 참여」, 2025.10.29</span></div></footer>
+</section></div>
+</div>
+<div id="scene-appM" class="scene-frame clip" data-composition-id="appM" data-start="100" data-duration="4" data-track-index="1" data-label="부록 13. 아이디어 선정 과정" data-width="1920" data-height="1080">
+<div class="scale-box"><section class="slide app-sl">
+  <div class="top top-app"><span class="back-hint">‹ 버튼을 누르면 보던 장으로 돌아갑니다</span></div>
+  <h1 class="t">부록 13. 아이디어 선정 과정</h1>
+  <p class="sub">기준 5개: 정답 데이터를 우리가 만드는가(1순위), 1단계 자산 재활용, 시장·예산, 경쟁, 첫 데모까지 속도</p>
+  <div class="body">
+    <div style="display:grid;grid-template-columns:1.25fr 1fr;gap:28px">
+      <table class="tbl xs">
+        <thead><tr><th style="width:36%">후보</th><th style="width:16%">결과</th><th>사유</th></tr></thead>
+        <tbody>
+          <tr><td>AI 무전 교관</td><td>선정</td><td>정답 데이터를 우리가 만듦, SW만 추가</td></tr>
+          <tr><td>KCTC 무전 블랙박스</td><td>확장 2단계</td><td>KCTC 데이터에 의존, 교관 다음 단계로</td></tr>
+          <tr><td>무전에서 C4I 보고 자동화</td><td>확장 3단계</td><td>보안·인증 장벽이 가장 높음</td></tr>
+          <tr><td>음향 드론 탐지망</td><td>별도 검토</td><td>하드웨어 개발이 필요하고 1단계 자산 재활용이 낮음</td></tr>
+          <tr><td>음성 지휘 드론 GCS</td><td>보류</td><td>드론 기체 협력이 필요</td></tr>
+          <tr><td>통신보안 위반 자동 탐지</td><td>보류</td><td>판단 근거 부족</td></tr>
+          <tr><td>딥페이크 지휘 음성 탐지</td><td>제외</td><td>화자마다 등록 데이터 필요</td></tr>
+          <tr><td>군 비행장 복창 오류 감시</td><td>제외</td><td>실제 기체 데이터와 대조 필요</td></tr>
+        </tbody>
+      </table>
+      <table class="tbl xs">
+        <thead><tr><th>최종 3개 비교</th><th>교관</th><th>블랙박스</th><th>드론 탐지</th></tr></thead>
+        <tbody>
+          <tr><td>데이터 자체 생성</td><td class="dots">●●●</td><td class="dots">●○○</td><td class="dots">●●○</td></tr>
+          <tr><td>자산 재활용</td><td class="dots">●●●</td><td class="dots">●●●</td><td class="dots">●●○</td></tr>
+          <tr><td>시장·예산</td><td class="dots">●●○</td><td class="dots">●○○</td><td class="dots">●●●</td></tr>
+          <tr><td>데모 속도</td><td class="dots">●●●</td><td class="dots">●●○</td><td class="dots">●○○</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <footer class="foot"><div class="abbr"><span>●가 많을수록 유리. A4AI 내부 판단이며 정량 평가가 아닙니다</span></div></footer>
+</section></div>
+</div>
+<div id="scene-appZ" class="scene-frame clip" data-composition-id="appZ" data-start="104" data-duration="4" data-track-index="1" data-label="출처 전체" data-width="1920" data-height="1080">
+<div class="scale-box"><section class="slide app-sl">
+  <div class="top top-app"><span class="back-hint">‹ 버튼을 누르면 보던 장으로 돌아갑니다</span></div>
+  <h1 class="t">출처 전체</h1>
+  <div class="body">
+    <div class="src">
+      <h2>내부·공식 문서</h2>
+      <ul>
+        <li>㈜에이포에이아이, K-방산 스타트업 육성사업 1단계 과제 신청서(제출본), 2026.07.31</li>
+        <li>개발팀 회의록(프로젝트 현황·로드맵 점검), 2026.07.20</li>
+        <li>국방신속획득기술연구원, ’27-2차 신속시범사업 대상사업 공모문 및 붙임1 사업수요신청서 양식</li>
+        <li>국방전력발전업무훈령 별표 4 「무기체계 세부분류」(공모문 붙임 2)</li>
+        <li>방위사업청, 지휘통제정보공유체계(R&amp;D) 사업 예비설명회(2차) 공고, 2026.10.06</li>
+      </ul>
+      <h2>데이터·연구</h2>
+      <ul>
+        <li><a href="https://www.kais99.org/jkais/journal/Vol25no03/Vol25no03p11.pdf">차현우·마정목, 「트랜스포머 기반 군사용 자동음성인식 모델 제안 및 평가」, 한국산학기술학회논문지 25(3) pp.102-107, 2024</a></li>
+        <li><a href="https://backend.ainonline.com/sites/default/files/article_export/rtf/Embry-Riddle_Enhances_Aviation_Radio_Comms_with_AI-02-09-2026.rtf">AIN, “Embry-Riddle Enhances Aviation Radio Comms with AI”, 2026</a></li>
+        <li><a href="https://arxiv.org/abs/2606.18319">Chew 외, ASTRA 관제사 훈련 시뮬레이터 논문, arXiv 2606.18319, 2026.06</a></li>
+        <li><a href="https://publications.idiap.ch/publications/show/4728">Helmke 외, “Readback Error Detection by Automatic Speech Recognition to Increase ATM Safety”, ATM2021, 2021.09</a></li>
+        <li><a href="https://m.news.nate.com/view/20260808n02431">뉴스1(허고운), 「KCTC, AI로 ‘승리 알고리즘’ 찾는다」, 2026.08.08</a></li>
+        <li><a href="https://www.etnews.com/20261023000175">전자신문, 「육·해·공에 흩어진 GPU 통합…국방AI데이터센터 밑그림 착수」, 2026.10.25</a></li>
+      </ul>
+      <h2>유사 사례·예산 선례</h2>
+      <ul>
+        <li><a href="https://calian.com/resources/case-studies/case-study-calian-develops-and-delivers-virtual-reality-trainer-with-speech-recognition-for-joint-terminal-attack-controller-jtac-training">Calian, JTAC VR Trainer with Speech Recognition 사례 연구(게시일 미표기)</a></li>
+        <li><a href="https://halldale.com/defence/17310-asti-to-integrate-simulated-atc-system-into-coast-guard-flight-simulator">Halldale, “ASTi to Integrate Simulated ATC System into Coast Guard Flight Simulator”, 2020.07.07</a></li>
+        <li><a href="https://www.fnnews.com/news/202610200958322342">파이낸셜뉴스(최두선), 「버넥트, 국방부 대드론 AI 시뮬레이터 사업 착수」, 2026.10.20</a></li>
+        <li><a href="https://feed.viewus.co.kr/ai/article/345040/">뷰어스, 「버넥트, 국방부 대드론 AI 훈련 시뮬레이터 착수…지원금 20억 중 7억2000만원」, 2026.10.24</a></li>
+        <li><a href="https://www.newsway.co.kr/news/view?ud=2025102910065873201">뉴스웨이(유선희), 「한컴라이프케어, 육군 훈련 시스템 성능개량 사업 참여」, 2025.10.29</a></li>
+      </ul>
+      <h2>정책·예산·업계</h2>
+      <ul>
+        <li><a href="https://www.aitimes.kr/news/articleView.html?idxno=41743">인공지능신문(박현진), 「2027년 국방예산 73조원 돌파, 역대 최대… AI·유무인체계에 7,727억원 투입」, 2026.09.03</a></li>
+        <li><a href="https://www.newspim.com/news/view/20260901000947">뉴스핌(오동룡), 「[2027 예산안] 73조 국방예산… AI·드론에 돈 몰린다」, 2026.09.01</a></li>
+        <li><a href="https://www.goodmorningcc.com/news/articleView.html?idxno=435885">굿모닝충청, 「2026년 국방예산 65.8조 확정」, 2025.12.03</a></li>
+        <li><a href="https://www.ksw-news.com/news/articleView.html?idxno=3051184">한국사회복지저널(정세연), 「국방부, 2026 국방인공지능 추진평가 회의 개최」, 2026.10.22</a></li>
+        <li><a href="https://www.polinews.co.kr/news/articleView.html?idxno=744230">폴리뉴스(최한성), 「삼성SDS·네이버, 공공 넘어 국방 AI 경쟁…KCCS 주도권 놓고 맞붙는다」, 2026.09.28</a></li>
+        <li><a href="https://www.etnews.com/20261007000167">전자신문(강성전), 「삼성SDS 합류한 LIG 컨소, KJCCS 우협 선정」, 2026.10.07</a></li>
+        <li><a href="https://www.sedaily.com/article/20079217">서울경제(이현호), 「K-방산, 수출 부진에 ‘방산 빅4’ 수주잔고 감소세」, 2026.08.14</a></li>
+        <li><a href="https://www.mt.co.kr/policy/2026/04/27/2026042711162411420">머니투데이(허재구), 「대전시, ‘K방산 스타트업 육성사업’ 수행기관 선정」, 2026.04.27</a></li>
+        <li><a href="https://www.korea.kr/news/policyNewsView.do?newsId=148959821">정책브리핑, 「2030년까지 방산 스타트업 100개 육성」, 2026.02.23</a></li>
+      </ul>
+      <h2>이미지</h2>
+      <ul><li>표지·목차·확장 경로 장의 사진: OpenAI Codex 이미지 생성, 2026.10.26. 실제 장면이 아닙니다.</li></ul>
+    </div>
+  </div>
+  <footer class="foot"><div class="abbr"><span>웹 자료는 2026년 10월 26일 원문 확인 기준</span></div></footer>
+</section></div>
+</div>
+</div>
+
+<script>
+(function () {
+  let chartSeq = 0;
+  // 가로 막대 차트: 기준선에 붙은 각진 끝, 데이터 쪽 끝만 4px 둥글게
+  const NS = 'http://www.w3.org/2000/svg';
+  const fmt = (v, c) => (c.fmt === 'comma' ? v.toLocaleString('ko-KR') : String(v)) + (c.unit || '');
+  const barPath = (x, y, w, h, r) => { r = Math.min(r, w, h / 2); return `M${x},${y}H${x + w - r}A${r},${r} 0 0 1 ${x + w},${y + r}V${y + h - r}A${r},${r} 0 0 1 ${x + w - r},${y + h}H${x}Z`; };
+  document.querySelectorAll('.chart[data-chart]').forEach(el => {
+    const c = JSON.parse(el.dataset.chart), W = 700, L = c.labelW, R = 150, P = W - L - R;
+    const n = c.rows[0].values.length, gh = n * c.barH + (n - 1) * 3, H = c.rows.length * (gh + c.gap) - c.gap + 30;
+    const colors = ['var(--bar-1)', 'var(--bar-2)'];
+    const svg = document.createElementNS(NS, 'svg'); svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.setAttribute('role', 'img');
+    svg.setAttribute('aria-label', c.rows.map(r => r.label + ' ' + r.values.map(v => fmt(v, c)).join(', ')).join('; '));
+    let s = `<defs><pattern id="hatch${el.dataset.i = 'c' + (++chartSeq)}" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="8" fill="var(--bar-1)"/><line x1="0" y1="0" x2="0" y2="8" stroke="#ECEEE8" stroke-width="3"/></pattern></defs>`;
+    c.ticks.forEach(t => { const x = L + t / c.max * P; s += `<line x1="${x}" x2="${x}" y1="0" y2="${H - 26}" stroke="#D5DACD" stroke-width="1"/><text x="${x}" y="${H - 6}" font-size="14" fill="#5C6860" text-anchor="middle">${fmt(t, c)}</text>`; });
+    c.rows.forEach((r, i) => {
+      const y0 = i * (gh + c.gap);
+      s += `<text x="${L - 14}" y="${y0 + gh / 2}" font-size="17" fill="#1D2A24" text-anchor="end" dominant-baseline="middle">${r.label}</text>`;
+      r.values.forEach((v, k) => {
+        const y = y0 + k * (c.barH + 3), w = v / c.max * P;
+        const fill = r.partial ? `url(#hatch${el.dataset.i})` : colors[r.c ?? k];
+        const tip = (r.tips && r.tips[k]) || r.tip || (r.label + ' ' + fmt(v, c));
+        s += `<g class="bar" tabindex="0" data-tip="${tip}" data-x="${(L + w) / W}" data-y="${(y + c.barH / 2) / H}"><rect x="${L}" y="${y - 2}" width="${P + R}" height="${c.barH + 4}" fill="transparent"/><path d="${barPath(L, y, w, c.barH, 4)}" fill="${fill}"/><text x="${L + w + 8}" y="${y + c.barH / 2}" font-size="17" font-weight="600" fill="#1D2A24" dominant-baseline="middle">${r.note || fmt(v, c)}</text></g>`;
+      });
+    });
+    s += `<line x1="${L}" x2="${L}" y1="0" y2="${H - 26}" stroke="#5C6860" stroke-width="1.5"/>`;
+    svg.innerHTML = s; el.appendChild(svg);
+    const tipEl = document.createElement('div'); tipEl.className = 'tip'; el.appendChild(tipEl);
+    const on = g => { tipEl.textContent = g.dataset.tip; tipEl.style.left = (+g.dataset.x * 100) + '%'; tipEl.style.top = (+g.dataset.y * 100) + '%'; tipEl.classList.add('on'); };
+    const off = () => tipEl.classList.remove('on');
+    svg.querySelectorAll('.bar').forEach(g => { g.addEventListener('mouseenter', () => on(g)); g.addEventListener('focus', () => on(g)); g.addEventListener('mouseleave', off); g.addEventListener('blur', off); });
+  });
+
+  // 표지 음성 파형: 발화 구간 4곳을 앰버로
+  const wave = document.getElementById('wave');
+  const bars = 176, w = 1408 / bars, burst = [[30, 48], [60, 86], [96, 120], [128, 156]];
+  let svg = '';
+  for (let i = 0; i < bars; i++) {
+    const inB = burst.some(([a, b]) => i >= a && i < b);
+    const amp = inB ? 12 + 16 * Math.abs(Math.sin(i * 0.9) * Math.cos(i * 0.23)) + 6 * Math.abs(Math.sin(i * 2.7)) : 2 + 4 * Math.abs(Math.sin(i * 1.3));
+    svg += '<rect x="' + (i * w + 1).toFixed(1) + '" y="' + (30 - amp).toFixed(1) + '" width="' + (w - 3).toFixed(1) + '" height="' + (amp * 2).toFixed(1) + '" rx="2" fill="' + (inB ? '#F2A900' : '#4E5D3C') + '"/>';
+  }
+  wave.innerHTML = svg;
+
+})();
+</script>
+<!-- 루트 타임라인: 전체 길이만큼 탐색 가능 -->
+<script>
+  (function () {
+    window.__timelines = window.__timelines || {};
+    var tl = gsap.timeline({ paused: true });
+    tl.to({}, { duration: 108 });
+    window.__timelines["root"] = tl;
+  })();
+</script>
+<!-- 장면 표시 제어: 재생 헤드가 있는 장면만 보이게 -->
+<script>
+  (function () {
+    var scenes = [{"id": "scene-s0", "start": 0, "end": 4}, {"id": "scene-toc", "start": 4, "end": 8}, {"id": "scene-s2", "start": 8, "end": 12}, {"id": "scene-s3", "start": 12, "end": 16}, {"id": "scene-s4", "start": 16, "end": 20}, {"id": "scene-s5", "start": 20, "end": 24}, {"id": "scene-s6", "start": 24, "end": 28}, {"id": "scene-s7", "start": 28, "end": 32}, {"id": "scene-s8", "start": 32, "end": 36}, {"id": "scene-s9", "start": 36, "end": 40}, {"id": "scene-s10", "start": 40, "end": 44}, {"id": "scene-s12", "start": 44, "end": 48}, {"id": "scene-s13", "start": 48, "end": 52}, {"id": "scene-appA", "start": 52, "end": 56}, {"id": "scene-appB", "start": 56, "end": 60}, {"id": "scene-appC", "start": 60, "end": 64}, {"id": "scene-appD", "start": 64, "end": 68}, {"id": "scene-appE", "start": 68, "end": 72}, {"id": "scene-appF", "start": 72, "end": 76}, {"id": "scene-appG", "start": 76, "end": 80}, {"id": "scene-appH", "start": 80, "end": 84}, {"id": "scene-appI", "start": 84, "end": 88}, {"id": "scene-appJ", "start": 88, "end": 92}, {"id": "scene-appK", "start": 92, "end": 96}, {"id": "scene-appL", "start": 96, "end": 100}, {"id": "scene-appM", "start": 100, "end": 104}, {"id": "scene-appZ", "start": 104, "end": 108}];
+    function updateVisibility(t) {
+      for (var i = 0; i < scenes.length; i++) {
+        var s = scenes[i], el = document.getElementById(s.id);
+        if (!el) continue;
+        var active = t >= s.start && t < s.end;
+        el.style.opacity = active ? "1" : "0";
+        el.style.visibility = active ? "visible" : "hidden";
+        el.style.pointerEvents = active ? "auto" : "none";
+        el.classList.toggle("is-active", active);
+      }
+    }
+    window.__hfSetTime = updateVisibility;
+    updateVisibility(0);
+    var root = window.__timelines && window.__timelines["root"];
+    if (root) root.eventCallback("onUpdate", function () { updateVisibility(root.time()); });
+  })();
+</script>
+<!-- 장면 시간표를 부모(슬라이드쇼)에 알림 -->
+<script>
+  (function () {
+    var FPS = 30, totalSeconds = 108;
+    var scenes = [{"id": "s0", "start": 0, "duration": 4}, {"id": "toc", "start": 4, "duration": 4}, {"id": "s2", "start": 8, "duration": 4}, {"id": "s3", "start": 12, "duration": 4}, {"id": "s4", "start": 16, "duration": 4}, {"id": "s5", "start": 20, "duration": 4}, {"id": "s6", "start": 24, "duration": 4}, {"id": "s7", "start": 28, "duration": 4}, {"id": "s8", "start": 32, "duration": 4}, {"id": "s9", "start": 36, "duration": 4}, {"id": "s10", "start": 40, "duration": 4}, {"id": "s12", "start": 44, "duration": 4}, {"id": "s13", "start": 48, "duration": 4}, {"id": "appA", "start": 52, "duration": 4}, {"id": "appB", "start": 56, "duration": 4}, {"id": "appC", "start": 60, "duration": 4}, {"id": "appD", "start": 64, "duration": 4}, {"id": "appE", "start": 68, "duration": 4}, {"id": "appF", "start": 72, "duration": 4}, {"id": "appG", "start": 76, "duration": 4}, {"id": "appH", "start": 80, "duration": 4}, {"id": "appI", "start": 84, "duration": 4}, {"id": "appJ", "start": 88, "duration": 4}, {"id": "appK", "start": 92, "duration": 4}, {"id": "appL", "start": 96, "duration": 4}, {"id": "appM", "start": 100, "duration": 4}, {"id": "appZ", "start": 104, "duration": 4}];
+    function postTimeline() {
+      parent.postMessage({ source: "hf-preview", type: "timeline", durationInFrames: totalSeconds * FPS, scenes: scenes }, "*");
+    }
+    if (document.readyState === "complete") setTimeout(postTimeline, 300);
+    else window.addEventListener("load", function () { setTimeout(postTimeline, 300); });
+  })();
+</script>
+
+</body>
+</html>
