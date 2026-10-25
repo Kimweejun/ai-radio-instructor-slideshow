@@ -41,25 +41,26 @@ button{font:inherit;color:inherit}
 #notes[hidden]{display:none}
 body.full .top,body.full .bot,body.full #notes{display:none}
 
-/* 무대: 16:9 슬라이드를 화면에 맞춤. 핫스팟(%)이 슬라이드와 겹치도록 상자 자체를 16:9로 */
+/* 무대: 16:9 슬라이드를 화면에 맞춤. 배지 층(#refs)도 같은 상자 크기로 겹침 */
 #viewport{flex:1;position:relative;min-height:0;container-type:size}
-hyperframes-slideshow{display:block;position:absolute;left:50%;top:50%;width:min(97cqw,172.44cqh);height:min(97cqh,54.56cqw);transform:translate(-50%,-50%);border-radius:6px;overflow:hidden;box-shadow:0 0 0 1px var(--line);outline:none;--hf-slideshow-accent:var(--olive)}
-body.full hyperframes-slideshow{width:min(100cqw,177.78cqh);height:min(100cqh,56.25cqw);border-radius:0;box-shadow:none}
+hyperframes-slideshow,#refs{position:absolute;left:50%;top:50%;width:min(97cqw,172.44cqh);height:min(97cqh,54.56cqw);transform:translate(-50%,-50%)}
+body.full hyperframes-slideshow,body.full #refs{width:min(100cqw,177.78cqh);height:min(100cqh,56.25cqw)}
+hyperframes-slideshow{display:block;border-radius:6px;overflow:hidden;box-shadow:0 0 0 1px var(--line);outline:none;--hf-slideshow-accent:var(--olive)}
+body.full hyperframes-slideshow{border-radius:0;box-shadow:none}
 hyperframes-player{position:absolute;inset:0}
 hyperframes-slideshow:focus,hyperframes-slideshow:focus-visible{outline:none}
 .progress{position:absolute;left:0;bottom:0;height:3px;width:100%;background:var(--signal);transform:scaleX(0);transform-origin:left;transition:transform .5s cubic-bezier(.2,.8,.2,1)}
 /* 슬라이드쇼 기본 조작 캡슐은 숨기고 아래 바로 대신함 */
 hyperframes-slideshow [data-hf-nav-cluster]{display:none!important}
-[data-hf-chrome]{container-type:size}
 
-/* 부록 참조 핫스팟: 작은 번호 배지, 마우스를 올리면 '부록 N 참고' */
-hyperframes-slideshow .hf-hotspot-pill{min-width:calc(.9cqw + .9cqw)!important;height:calc(.9cqw + .9cqw)!important;padding:0 .2cqw!important;gap:0!important;justify-content:center!important;border:.45cqw solid transparent!important;background-clip:padding-box!important;margin:-.45cqw 0 0 -.45cqw!important;border-radius:999px!important;background:var(--olive)!important;color:var(--olive-ink)!important;font-size:0!important;box-shadow:none!important;animation:none!important}
-hyperframes-slideshow .hf-hotspot-pill>span{display:none!important}
-hyperframes-slideshow .hf-hotspot-pill::before{content:attr(data-hotspot-id);font:600 .6cqw/1 var(--sans);color:var(--olive-ink)}
-hyperframes-slideshow .hf-hotspot-pill::after{content:attr(aria-label);position:absolute;left:50%;bottom:calc(100% + .45cqw);transform:translateX(-50%);background:var(--ink);color:var(--olive-ink);font:500 .94cqw/1.3 var(--sans);padding:.38cqw .62cqw;border-radius:.25cqw;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .12s}
-hyperframes-slideshow .hf-hotspot-pill:hover::after,hyperframes-slideshow .hf-hotspot-pill:focus-visible::after{opacity:1}
-hyperframes-slideshow .hf-hotspot-pill:hover{background:var(--ink)!important}
-hyperframes-slideshow .hf-hotspot-pill:focus-visible{outline:2px solid var(--signal)!important;outline-offset:1px}
+/* 부록 번호 배지: 각주처럼 작고 옅게, 마우스를 올리면 '부록 N 참고' */
+#refs{pointer-events:none;container-type:size;z-index:2}
+.rf{position:absolute;transform:translate(-50%,-50%);min-width:.75cqw;height:.75cqw;padding:0 .14cqw;border:0;border-radius:999px;background:#D9DECF;color:var(--olive);font:700 .5cqw/1 var(--sans);display:grid;place-items:center;cursor:pointer;pointer-events:auto}
+.rf::before{content:'';position:absolute;inset:-.45cqw}
+.rf::after{content:attr(aria-label);position:absolute;left:50%;bottom:calc(100% + .4cqw);transform:translateX(-50%);background:var(--ink);color:var(--olive-ink);font:500 .9cqw/1.3 var(--sans);padding:.35cqw .6cqw;border-radius:.25cqw;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .12s}
+.rf:hover,.rf:focus-visible{background:var(--olive);color:var(--olive-ink)}
+.rf:hover::after,.rf:focus-visible::after{opacity:1}
+.rf:focus-visible{outline:2px solid var(--signal);outline-offset:1px}
 
 /* 전체 보기 */
 #list{display:none;position:fixed;inset:0;z-index:40;background:#fff;overflow:auto;padding:28px 40px 60px}
@@ -140,247 +141,19 @@ hyperframes-slideshow .hf-hotspot-pill:focus-visible{outline:2px solid var(--sig
     },
     {
       "sceneId": "toc",
-      "notes": "오늘은 네 부분으로 말씀드리겠습니다.\n\n먼저 저희가 지금 가진 자산을 보고, 이어서 오늘 가장 강조하고 싶은 데이터 이야기를 드리겠습니다. 그다음 AI 무전 교관이 무엇이고 어떻게 동작하는지, 마지막으로 어디까지 확장하고 어떻게 시작할지 말씀드리겠습니다.\n\n세부 근거는 부록 1부터 13까지에 모아 두었습니다.",
-      "hotspots": [
-        {
-          "id": "1",
-          "label": "부록 1 참고",
-          "target": "seq-appA",
-          "region": {
-            "x": 8.494,
-            "y": 89.498,
-            "w": 1.188,
-            "h": 2.111
-          }
-        },
-        {
-          "id": "2",
-          "label": "부록 2 참고",
-          "target": "seq-appB",
-          "region": {
-            "x": 10.057,
-            "y": 89.498,
-            "w": 1.188,
-            "h": 2.111
-          }
-        },
-        {
-          "id": "3",
-          "label": "부록 3 참고",
-          "target": "seq-appC",
-          "region": {
-            "x": 11.619,
-            "y": 89.498,
-            "w": 1.188,
-            "h": 2.111
-          }
-        },
-        {
-          "id": "4",
-          "label": "부록 4 참고",
-          "target": "seq-appD",
-          "region": {
-            "x": 13.182,
-            "y": 89.498,
-            "w": 1.188,
-            "h": 2.111
-          }
-        },
-        {
-          "id": "5",
-          "label": "부록 5 참고",
-          "target": "seq-appE",
-          "region": {
-            "x": 14.744,
-            "y": 89.498,
-            "w": 1.187,
-            "h": 2.111
-          }
-        },
-        {
-          "id": "6",
-          "label": "부록 6 참고",
-          "target": "seq-appF",
-          "region": {
-            "x": 16.307,
-            "y": 89.498,
-            "w": 1.187,
-            "h": 2.111
-          }
-        },
-        {
-          "id": "7",
-          "label": "부록 7 참고",
-          "target": "seq-appG",
-          "region": {
-            "x": 17.869,
-            "y": 89.498,
-            "w": 1.187,
-            "h": 2.111
-          }
-        },
-        {
-          "id": "8",
-          "label": "부록 8 참고",
-          "target": "seq-appH",
-          "region": {
-            "x": 19.432,
-            "y": 89.498,
-            "w": 1.187,
-            "h": 2.111
-          }
-        },
-        {
-          "id": "9",
-          "label": "부록 9 참고",
-          "target": "seq-appI",
-          "region": {
-            "x": 20.994,
-            "y": 89.498,
-            "w": 1.187,
-            "h": 2.111
-          }
-        },
-        {
-          "id": "10",
-          "label": "부록 10 참고",
-          "target": "seq-appJ",
-          "region": {
-            "x": 22.557,
-            "y": 89.498,
-            "w": 1.563,
-            "h": 2.111
-          }
-        },
-        {
-          "id": "11",
-          "label": "부록 11 참고",
-          "target": "seq-appK",
-          "region": {
-            "x": 24.494,
-            "y": 89.498,
-            "w": 1.563,
-            "h": 2.111
-          }
-        },
-        {
-          "id": "12",
-          "label": "부록 12 참고",
-          "target": "seq-appL",
-          "region": {
-            "x": 26.432,
-            "y": 89.498,
-            "w": 1.563,
-            "h": 2.111
-          }
-        },
-        {
-          "id": "13",
-          "label": "부록 13 참고",
-          "target": "seq-appM",
-          "region": {
-            "x": 28.369,
-            "y": 89.498,
-            "w": 1.563,
-            "h": 2.111
-          }
-        },
-        {
-          "id": "출처",
-          "label": "출처 참고",
-          "target": "seq-appZ",
-          "region": {
-            "x": 30.307,
-            "y": 89.498,
-            "w": 2.02,
-            "h": 2.111
-          }
-        }
-      ]
+      "notes": "오늘은 네 부분으로 말씀드리겠습니다.\n\n먼저 저희가 지금 가진 자산을 보고, 이어서 오늘 가장 강조하고 싶은 데이터 이야기를 드리겠습니다. 그다음 AI 무전 교관이 무엇이고 어떻게 동작하는지, 마지막으로 어디까지 확장하고 어떻게 시작할지 말씀드리겠습니다.\n\n세부 근거는 부록 1부터 13까지에 모아 두었습니다."
     },
     {
       "sceneId": "s2",
-      "notes": "저희가 어디에 서 있는지부터 보겠습니다.\n\n1단계 과제에서 저희는 교환기 스위치에서 음성을 받아 텍스트로 바꾸고, 군 용어와 숫자, 좌표를 보정하고, 시간·좌표·명령 같은 7개 필드로 정리한 뒤, 사람이 승인한 결과를 저장하는 서버를 만들고 있습니다.\n\n여기에 GCS Saker 관제 화면, 무전기 소음감쇄 칩 과제, 지휘관 의사결정 지원 SW가 있습니다. 그리고 과제책임자가 통신장교 출신입니다.\n\n오늘 제안은 이 자산들을 거의 그대로 쓰는 쪽으로 설계했습니다.",
-      "hotspots": [
-        {
-          "id": "2",
-          "label": "부록 2 참고",
-          "target": "seq-appB",
-          "region": {
-            "x": 26.874,
-            "y": 17.611,
-            "w": 1.187,
-            "h": 2.111
-          }
-        }
-      ]
+      "notes": "저희가 어디에 서 있는지부터 보겠습니다.\n\n1단계 과제에서 저희는 교환기 스위치에서 음성을 받아 텍스트로 바꾸고, 군 용어와 숫자, 좌표를 보정하고, 시간·좌표·명령 같은 7개 필드로 정리한 뒤, 사람이 승인한 결과를 저장하는 서버를 만들고 있습니다.\n\n여기에 GCS Saker 관제 화면, 무전기 소음감쇄 칩 과제, 지휘관 의사결정 지원 SW가 있습니다. 그리고 과제책임자가 통신장교 출신입니다.\n\n오늘 제안은 이 자산들을 거의 그대로 쓰는 쪽으로 설계했습니다."
     },
     {
       "sceneId": "s3",
-      "notes": "두 번째 파트는 데이터입니다. 오늘 발표에서 가장 강조하고 싶은 부분입니다.\n\n왼쪽은 국방대학교 연구입니다. 같은 Whisper 모델에 어떤 군 데이터를 학습시켰느냐에 따라 문자 오류율이 13.68%에서 7.94%까지 달라졌습니다. 용어사전만 학습하면 거의 그대로였고, 전술 개념이 담긴 교범을 학습했을 때 가장 정확했습니다.\n\n해외도 마찬가지입니다. 항공 무선 교신에서 시판 음성인식의 단어 오류율은 80%였는데, 그 분야 데이터로 맞춤화하자 15% 미만이 됐습니다. 싱가포르 관제 훈련 연구에서도 최대 107.8%가 23.45%로 내려갔습니다.\n\n모델은 누구나 가져다 쓸 수 있습니다. 차이를 만드는 건 그 분야 데이터입니다.",
-      "hotspots": [
-        {
-          "id": "3",
-          "label": "부록 3 참고",
-          "target": "seq-appC",
-          "region": {
-            "x": 38.352,
-            "y": 23.5,
-            "w": 1.187,
-            "h": 2.111
-          }
-        },
-        {
-          "id": "2",
-          "label": "부록 2 참고",
-          "target": "seq-appB",
-          "region": {
-            "x": 88.166,
-            "y": 60.856,
-            "w": 1.187,
-            "h": 2.111
-          }
-        }
-      ]
+      "notes": "두 번째 파트는 데이터입니다. 오늘 발표에서 가장 강조하고 싶은 부분입니다.\n\n왼쪽은 국방대학교 연구입니다. 같은 Whisper 모델에 어떤 군 데이터를 학습시켰느냐에 따라 문자 오류율이 13.68%에서 7.94%까지 달라졌습니다. 용어사전만 학습하면 거의 그대로였고, 전술 개념이 담긴 교범을 학습했을 때 가장 정확했습니다.\n\n해외도 마찬가지입니다. 항공 무선 교신에서 시판 음성인식의 단어 오류율은 80%였는데, 그 분야 데이터로 맞춤화하자 15% 미만이 됐습니다. 싱가포르 관제 훈련 연구에서도 최대 107.8%가 23.45%로 내려갔습니다.\n\n모델은 누구나 가져다 쓸 수 있습니다. 차이를 만드는 건 그 분야 데이터입니다."
     },
     {
       "sceneId": "s4",
-      "notes": "그런데 그 군 음성 데이터는 어디서 왔을까요. 모두 직접 만들어 썼습니다.\n\n저희 1단계도 승인받은 파일과 모의 시험망으로 시험하고 있고, 실제 운용망 연동은 후속 단계로 남겨 두었습니다. 음성 데이터는 민감정보로 반출을 통제합니다.\n\n앞 장의 국방대 연구도 현역 장교 열 명이 교범과 용어사전을 직접 읽어 녹음한 음성으로 학습했습니다. KCTC는 영상과 음성이 흩어져 있고 정제할 도구가 없다고 스스로 진단했습니다.\n\n저희 VCM 과제에서도 외부 음원은 이용 조건 확인이 어려워 라이선스가 명확한 음원을 따로 확보해 썼습니다.",
-      "hotspots": [
-        {
-          "id": "4",
-          "label": "부록 4 참고",
-          "target": "seq-appD",
-          "region": {
-            "x": 13.508,
-            "y": 20.167,
-            "w": 1.188,
-            "h": 2.111
-          }
-        },
-        {
-          "id": "3",
-          "label": "부록 3 참고",
-          "target": "seq-appC",
-          "region": {
-            "x": 62.603,
-            "y": 20.167,
-            "w": 1.188,
-            "h": 2.111
-          }
-        },
-        {
-          "id": "4 ",
-          "label": "부록 4 참고",
-          "target": "seq-appD",
-          "region": {
-            "x": 16.853,
-            "y": 44.543,
-            "w": 1.188,
-            "h": 2.111
-          }
-        }
-      ]
+      "notes": "그런데 그 군 음성 데이터는 어디서 왔을까요. 모두 직접 만들어 썼습니다.\n\n저희 1단계도 승인받은 파일과 모의 시험망으로 시험하고 있고, 실제 운용망 연동은 후속 단계로 남겨 두었습니다. 음성 데이터는 민감정보로 반출을 통제합니다.\n\n앞 장의 국방대 연구도 현역 장교 열 명이 교범과 용어사전을 직접 읽어 녹음한 음성으로 학습했습니다. KCTC는 영상과 음성이 흩어져 있고 정제할 도구가 없다고 스스로 진단했습니다.\n\n저희 VCM 과제에서도 외부 음원은 이용 조건 확인이 어려워 라이선스가 명확한 음원을 따로 확보해 썼습니다."
     },
     {
       "sceneId": "s5",
@@ -388,346 +161,93 @@ hyperframes-slideshow .hf-hotspot-pill:focus-visible{outline:2px solid var(--sig
     },
     {
       "sceneId": "s6",
-      "notes": "이제 AI 무전 교관입니다. 먼저 이 제품이 놓일 흐름입니다.\n\nKCTC는 훈련 분석이 분석관의 경험과 직관에 상당 부분 기대고 있어 시간과 인력이 많이 든다고 스스로 진단했습니다. 그래서 육군은 훈련 시나리오 자동 생성, 난이도 자동 조정, 훈련 중 평가와 피드백, 훈련 직후 사후검토를 연구할 예정입니다.\n\n해외에서는 캐나다군이 화력 요청 무전 절차를 음성인식과 VR로 훈련하는 연구를 했습니다.\n\nAI 무전 교관은 이 흐름을 무전 교신 훈련에 먼저 적용하는 제품입니다. 다만 현장 교관의 실제 수요는 아직 직접 확인하지 않았고, 11월에 인터뷰로 확인하겠습니다.",
-      "hotspots": [
-        {
-          "id": "11",
-          "label": "부록 11 참고",
-          "target": "seq-appK",
-          "region": {
-            "x": 61.572,
-            "y": 36.266,
-            "w": 1.563,
-            "h": 2.111
-          }
-        }
-      ]
+      "notes": "이제 AI 무전 교관입니다. 먼저 이 제품이 놓일 흐름입니다.\n\nKCTC는 훈련 분석이 분석관의 경험과 직관에 상당 부분 기대고 있어 시간과 인력이 많이 든다고 스스로 진단했습니다. 그래서 육군은 훈련 시나리오 자동 생성, 난이도 자동 조정, 훈련 중 평가와 피드백, 훈련 직후 사후검토를 연구할 예정입니다.\n\n해외에서는 캐나다군이 화력 요청 무전 절차를 음성인식과 VR로 훈련하는 연구를 했습니다.\n\nAI 무전 교관은 이 흐름을 무전 교신 훈련에 먼저 적용하는 제품입니다. 다만 현장 교관의 실제 수요는 아직 직접 확인하지 않았고, 11월에 인터뷰로 확인하겠습니다."
     },
     {
       "sceneId": "s7",
-      "notes": "제품은 단순합니다. AI가 상황실이나 사격지휘소 같은 상대 무전병 역할을 음성으로 맡습니다. 교육생은 절차대로 보고하고 복창합니다.\n\n시스템은 그 교신을 받아 적고, 빠진 항목, 틀린 숫자와 좌표, 절차, 응답 시간을 바로 채점합니다. 오른쪽은 가상 화면 예시인데, 시나리오가 요구한 항목이 빠지면 그 자리에서 알려줍니다.\n\n결과는 GCS Saker 기반 교관 콘솔에 모입니다. 교관은 교육생별 점수와 반복되는 실수를 보고 녹음을 다시 들어볼 수 있습니다.",
-      "hotspots": [
-        {
-          "id": "7",
-          "label": "부록 7 참고",
-          "target": "seq-appG",
-          "region": {
-            "x": 27.438,
-            "y": 47.5,
-            "w": 1.187,
-            "h": 2.111
-          }
-        },
-        {
-          "id": "6",
-          "label": "부록 6 참고",
-          "target": "seq-appF",
-          "region": {
-            "x": 61.936,
-            "y": 19.5,
-            "w": 1.187,
-            "h": 2.111
-          }
-        }
-      ]
+      "notes": "제품은 단순합니다. AI가 상황실이나 사격지휘소 같은 상대 무전병 역할을 음성으로 맡습니다. 교육생은 절차대로 보고하고 복창합니다.\n\n시스템은 그 교신을 받아 적고, 빠진 항목, 틀린 숫자와 좌표, 절차, 응답 시간을 바로 채점합니다. 오른쪽은 가상 화면 예시인데, 시나리오가 요구한 항목이 빠지면 그 자리에서 알려줍니다.\n\n결과는 GCS Saker 기반 교관 콘솔에 모입니다. 교관은 교육생별 점수와 반복되는 실수를 보고 녹음을 다시 들어볼 수 있습니다."
     },
     {
       "sceneId": "s8",
-      "notes": "동작 방식입니다. 일곱 단계 중 진한 초록색 네 단계는 1단계 엔진을 그대로 씁니다.\n\n새로 만드는 건 노란색 세 가지입니다. 교범을 바탕으로 정답이 들어간 시나리오, 그 시나리오를 무전기 음질로 읽어 주는 AI 역할자, 그리고 정답과 대조하는 채점기입니다.\n\n음성 수신, 음성인식과 군 용어 보정, 7필드 추출, 저장은 1단계에서 이미 만들고 있습니다. 인터넷 없이 내부망에서 돌아가는 구조도 1단계와 같습니다.",
-      "hotspots": [
-        {
-          "id": "2",
-          "label": "부록 2 참고",
-          "target": "seq-appB",
-          "region": {
-            "x": 61.573,
-            "y": 63.944,
-            "w": 1.188,
-            "h": 2.111
-          }
-        },
-        {
-          "id": "7",
-          "label": "부록 7 참고",
-          "target": "seq-appG",
-          "region": {
-            "x": 68.187,
-            "y": 63.944,
-            "w": 1.188,
-            "h": 2.111
-          }
-        }
-      ]
+      "notes": "동작 방식입니다. 일곱 단계 중 진한 초록색 네 단계는 1단계 엔진을 그대로 씁니다.\n\n새로 만드는 건 노란색 세 가지입니다. 교범을 바탕으로 정답이 들어간 시나리오, 그 시나리오를 무전기 음질로 읽어 주는 AI 역할자, 그리고 정답과 대조하는 채점기입니다.\n\n음성 수신, 음성인식과 군 용어 보정, 7필드 추출, 저장은 1단계에서 이미 만들고 있습니다. 인터넷 없이 내부망에서 돌아가는 구조도 1단계와 같습니다."
     },
     {
       "sceneId": "s9",
-      "notes": "이 장이 앞에서 말씀드린 데이터 문제에 대한 답입니다.\n\n보통 음성 데이터는 녹음을 모으고, 사람이 듣고 받아 적고, 검수해야 만들어집니다. 앞 장처럼 군 음성은 녹음부터 직접 만들어야 했습니다.\n\nAI 무전 교관은 다릅니다. 시나리오를 저희가 쓰기 때문에 정답이 이미 있습니다. 교육생이 말하는 순간 정답이 붙은 군 음성이 한 건 저장됩니다.\n\n교육을 많이 할수록 데이터가 늘고, 인식과 채점이 정확해지고, 그래서 더 많이 쓰이는 선순환이 됩니다. 1단계 신청서에도 저장한 데이터를 2단계 학습에 쓰는 계획이 있어, 이 데이터가 그대로 재료가 됩니다.",
-      "hotspots": [
-        {
-          "id": "12",
-          "label": "부록 12 참고",
-          "target": "seq-appL",
-          "region": {
-            "x": 16.297,
-            "y": 65.054,
-            "w": 1.563,
-            "h": 2.111
-          }
-        },
-        {
-          "id": "11",
-          "label": "부록 11 참고",
-          "target": "seq-appK",
-          "region": {
-            "x": 41.55,
-            "y": 69.609,
-            "w": 1.563,
-            "h": 2.111
-          }
-        }
-      ]
+      "notes": "이 장이 앞에서 말씀드린 데이터 문제에 대한 답입니다.\n\n보통 음성 데이터는 녹음을 모으고, 사람이 듣고 받아 적고, 검수해야 만들어집니다. 앞 장처럼 군 음성은 녹음부터 직접 만들어야 했습니다.\n\nAI 무전 교관은 다릅니다. 시나리오를 저희가 쓰기 때문에 정답이 이미 있습니다. 교육생이 말하는 순간 정답이 붙은 군 음성이 한 건 저장됩니다.\n\n교육을 많이 할수록 데이터가 늘고, 인식과 채점이 정확해지고, 그래서 더 많이 쓰이는 선순환이 됩니다. 1단계 신청서에도 저장한 데이터를 2단계 학습에 쓰는 계획이 있어, 이 데이터가 그대로 재료가 됩니다."
     },
     {
       "sceneId": "s10",
-      "notes": "K-방산 관점에서 네 가지를 확인했습니다.\n\n먼저 무기체계 분류입니다. 훈령의 무기체계 세부분류에 ‘전술훈련모의장비’라는 항목이 있습니다. 실제로 이 항목으로 분류될지는 신속원이 판단하므로 사전 문의가 필요합니다. 공모 분야로는 10대 국방전략기술 중 인공지능에 해당합니다.\n\n예산 선례도 있습니다. 이번 달 국방부의 AI 대드론 훈련 시뮬레이터 신속상용화 지원사업이 12개월, 20억 원 규모로 착수했다고 보도됐습니다.\n\n해외에는 캐나다군 화력유도 훈련 연구, 그리고 교육생 교신을 자동 채점하는 관제사 훈련 시뮬레이터 ASTRA 같은 선례가 있습니다.",
-      "hotspots": [
-        {
-          "id": "9",
-          "label": "부록 9 참고",
-          "target": "seq-appI",
-          "region": {
-            "x": 49.171,
-            "y": 23.811,
-            "w": 1.187,
-            "h": 2.111
-          }
-        },
-        {
-          "id": "10",
-          "label": "부록 10 참고",
-          "target": "seq-appJ",
-          "region": {
-            "x": 44.765,
-            "y": 46.342,
-            "w": 1.563,
-            "h": 2.111
-          }
-        },
-        {
-          "id": "8",
-          "label": "부록 8 참고",
-          "target": "seq-appH",
-          "region": {
-            "x": 51.649,
-            "y": 59.519,
-            "w": 1.188,
-            "h": 2.111
-          }
-        }
-      ]
+      "notes": "K-방산 관점에서 네 가지를 확인했습니다.\n\n먼저 무기체계 분류입니다. 훈령의 무기체계 세부분류에 ‘전술훈련모의장비’라는 항목이 있습니다. 실제로 이 항목으로 분류될지는 신속원이 판단하므로 사전 문의가 필요합니다. 공모 분야로는 10대 국방전략기술 중 인공지능에 해당합니다.\n\n예산 선례도 있습니다. 이번 달 국방부의 AI 대드론 훈련 시뮬레이터 신속상용화 지원사업이 12개월, 20억 원 규모로 착수했다고 보도됐습니다.\n\n해외에는 캐나다군 화력유도 훈련 연구, 그리고 교육생 교신을 자동 채점하는 관제사 훈련 시뮬레이터 ASTRA 같은 선례가 있습니다."
     },
     {
       "sceneId": "s12",
-      "notes": "확장 경로입니다. 교육장에서 시작합니다. 여기서 정답이 붙은 군 음성과 채점 모델을 얻습니다.\n\n다음은 훈련장입니다. KCTC 같은 과학화훈련장의 무전을 7필드로 정리해서 교전 타임라인과 사후강평 리포트를 자동으로 만듭니다. KCTC가 연구하려는 AI 전투분석체계와 같은 방향입니다.\n\n마지막이 실전입니다. 무전 내용을 표준 보고서로 만들어 사람이 승인하면 지휘통제체계로 넘깁니다. 1단계 신청서에서 그린 TICN 실증 로드맵과 같은 방향입니다.\n\n각 단계의 데이터가 다음 단계의 출발점이 됩니다. 사진은 AI로 생성한 이미지입니다.",
-      "hotspots": [
-        {
-          "id": "12",
-          "label": "부록 12 참고",
-          "target": "seq-appL",
-          "region": {
-            "x": 41.286,
-            "y": 87.325,
-            "w": 1.563,
-            "h": 2.111
-          }
-        }
-      ]
+      "notes": "확장 경로입니다. 교육장에서 시작합니다. 여기서 정답이 붙은 군 음성과 채점 모델을 얻습니다.\n\n다음은 훈련장입니다. KCTC 같은 과학화훈련장의 무전을 7필드로 정리해서 교전 타임라인과 사후강평 리포트를 자동으로 만듭니다. KCTC가 연구하려는 AI 전투분석체계와 같은 방향입니다.\n\n마지막이 실전입니다. 무전 내용을 표준 보고서로 만들어 사람이 승인하면 지휘통제체계로 넘깁니다. 1단계 신청서에서 그린 TICN 실증 로드맵과 같은 방향입니다.\n\n각 단계의 데이터가 다음 단계의 출발점이 됩니다. 사진은 AI로 생성한 이미지입니다."
     },
     {
       "sceneId": "s13",
-      "notes": "실행 계획은 모두 가안입니다.\n\nMVP는 시나리오 세 가지로 시작합니다. 정찰 보고, 화력 요청, 의무후송 요청입니다. 정확한 양식은 교범으로 확인하겠습니다.\n\n11월에는 개발보다 확인에 집중합니다. 교관 인터뷰 세 건, 경북창경과 신속원 문의, 시나리오 초안입니다. 12월은 1단계 마무리가 우선이라 검수만 병행합니다.\n\n실제 개발은 1단계가 끝난 뒤 1월부터 6~8주, 3월에 교관 앞에서 시연하는 것이 목표입니다. 자금은 K-방산 2단계, 신속시범사업, 국방부 신속상용화 세 갈래를 보고 있습니다.\n\n이상입니다. 질문 주시면 부록으로 답변드리겠습니다.",
-      "hotspots": [
-        {
-          "id": "6",
-          "label": "부록 6 참고",
-          "target": "seq-appF",
-          "region": {
-            "x": 6.375,
-            "y": 28.127,
-            "w": 1.188,
-            "h": 2.111
-          }
-        },
-        {
-          "id": "7",
-          "label": "부록 7 참고",
-          "target": "seq-appG",
-          "region": {
-            "x": 26.467,
-            "y": 43.38,
-            "w": 1.188,
-            "h": 2.111
-          }
-        },
-        {
-          "id": "10",
-          "label": "부록 10 참고",
-          "target": "seq-appJ",
-          "region": {
-            "x": 47.988,
-            "y": 86.991,
-            "w": 1.563,
-            "h": 2.111
-          }
-        }
-      ]
-    }
-  ],
-  "slideSequences": [
-    {
-      "id": "seq-appA",
-      "label": "부록 1. 용어·약어 사전",
-      "slides": [
-        {
-          "sceneId": "appA",
-          "notes": "질문 대응 메모\n\n약어 질문이 나오면 이 장을 띄웁니다. 본문 각 장 하단에도 그 장의 약어가 적혀 있습니다."
-        }
-      ]
+      "notes": "실행 계획은 모두 가안입니다.\n\nMVP는 시나리오 세 가지로 시작합니다. 정찰 보고, 화력 요청, 의무후송 요청입니다. 정확한 양식은 교범으로 확인하겠습니다.\n\n11월에는 개발보다 확인에 집중합니다. 교관 인터뷰 세 건, 경북창경과 신속원 문의, 시나리오 초안입니다. 12월은 1단계 마무리가 우선이라 검수만 병행합니다.\n\n실제 개발은 1단계가 끝난 뒤 1월부터 6~8주, 3월에 교관 앞에서 시연하는 것이 목표입니다. 자금은 K-방산 2단계, 신속시범사업, 국방부 신속상용화 세 갈래를 보고 있습니다.\n\n이상입니다. 질문 주시면 부록으로 답변드리겠습니다."
     },
     {
-      "id": "seq-appB",
-      "label": "부록 2. 1단계 과제 요약",
-      "slides": [
-        {
-          "sceneId": "appB",
-          "notes": "질문 대응 메모\n\nQ. 1단계 일정에 영향은 없나? MVP 개발은 1단계 종료(12/31) 뒤 1월 착수라 겹치지 않습니다. 11~12월은 확인과 시나리오 작업만 합니다.\n\nQ. 1단계 서버를 그대로 쓰나? 입력 어댑터, STT·보정, 7필드, DB를 재사용합니다."
-        }
-      ]
+      "sceneId": "appA",
+      "notes": "질문 대응 메모\n\n약어 질문이 나오면 이 장을 띄웁니다. 본문 각 장 하단에도 그 장의 약어가 적혀 있습니다."
     },
     {
-      "id": "seq-appC",
-      "label": "부록 3. 데이터 근거 상세",
-      "slides": [
-        {
-          "sceneId": "appC",
-          "notes": "질문 대응 메모\n\nQ. 항공 사례를 군 무전에 그대로 적용할 수 있나? 그래서 한국어 군사용어 연구를 맨 위에 뒀습니다. 같은 Whisper도 교범 데이터를 학습하자 문자 오류율이 13.68%에서 7.94%로 내려갔습니다."
-        }
-      ]
+      "sceneId": "appB",
+      "notes": "질문 대응 메모\n\nQ. 1단계 일정에 영향은 없나? MVP 개발은 1단계 종료(12/31) 뒤 1월 착수라 겹치지 않습니다. 11~12월은 확인과 시나리오 작업만 합니다.\n\nQ. 1단계 서버를 그대로 쓰나? 입력 어댑터, STT·보정, 7필드, DB를 재사용합니다."
     },
     {
-      "id": "seq-appD",
-      "label": "부록 4. 군 음성 데이터 현황",
-      "slides": [
-        {
-          "sceneId": "appD",
-          "notes": "질문 대응 메모\n\nQ. 국방부가 데이터를 모으면 우리가 쓸 수 있지 않나? 국방AI데이터허브는 아직 사전 설계 단계의 구상입니다. 쓸 수 있게 되더라도, 교신 훈련 데이터처럼 정답이 붙은 군 음성은 우리가 만든 것이 차별점입니다."
-        }
-      ]
+      "sceneId": "appC",
+      "notes": "질문 대응 메모\n\nQ. 항공 사례를 군 무전에 그대로 적용할 수 있나? 그래서 한국어 군사용어 연구를 맨 위에 뒀습니다. 같은 Whisper도 교범 데이터를 학습하자 문자 오류율이 13.68%에서 7.94%로 내려갔습니다."
     },
     {
-      "id": "seq-appE",
-      "label": "부록 5. 국방 AI·예산 동향",
-      "slides": [
-        {
-          "sceneId": "appE",
-          "notes": "질문 대응 메모\n\nQ. 왜 지금인가? 2027년 정부안에서 AI·유무인 복합체계 예산이 4,968억 원에서 7,727억 원으로 늘었습니다. 반면 수출 수주는 2026년 7월 말 기준 약 80억 달러로 주춤합니다. 스타트업에게는 국내 AI 예산이 현실적인 기회입니다.\n\n2027년 수치는 국회 심의 전 정부안입니다."
-        }
-      ]
+      "sceneId": "appD",
+      "notes": "질문 대응 메모\n\nQ. 국방부가 데이터를 모으면 우리가 쓸 수 있지 않나? 국방AI데이터허브는 아직 사전 설계 단계의 구상입니다. 쓸 수 있게 되더라도, 교신 훈련 데이터처럼 정답이 붙은 군 음성은 우리가 만든 것이 차별점입니다."
     },
     {
-      "id": "seq-appF",
-      "label": "부록 6. 시나리오 설계 틀(안)",
-      "slides": [
-        {
-          "sceneId": "appF",
-          "notes": "질문 대응 메모\n\nQ. 시나리오는 몇 개나 만들어야 하나? MVP는 3종으로 시작하고, 교관 인터뷰에서 자주 쓰는 교신 유형을 받아 늘립니다."
-        }
-      ]
+      "sceneId": "appE",
+      "notes": "질문 대응 메모\n\nQ. 왜 지금인가? 2027년 정부안에서 AI·유무인 복합체계 예산이 4,968억 원에서 7,727억 원으로 늘었습니다. 반면 수출 수주는 2026년 7월 말 기준 약 80억 달러로 주춤합니다. 스타트업에게는 국내 AI 예산이 현실적인 기회입니다.\n\n2027년 수치는 국회 심의 전 정부안입니다."
     },
     {
-      "id": "seq-appG",
-      "label": "부록 7. 채점 기준(안)",
-      "slides": [
-        {
-          "sceneId": "appG",
-          "notes": "질문 대응 메모\n\nQ. 음성인식이 틀리면 채점도 틀리지 않나? 그래서 단어가 아니라 항목 단위로 대조하고, 확신이 낮으면 교관에게 넘깁니다. 항공관제 연구에서도 단어 단위 대조는 비효율적이었고 개념 단위 대조가 더 견고했습니다."
-        }
-      ]
+      "sceneId": "appF",
+      "notes": "질문 대응 메모\n\nQ. 시나리오는 몇 개나 만들어야 하나? MVP는 3종으로 시작하고, 교관 인터뷰에서 자주 쓰는 교신 유형을 받아 늘립니다."
     },
     {
-      "id": "seq-appH",
-      "label": "부록 8. 유사 사례",
-      "slides": [
-        {
-          "sceneId": "appH",
-          "notes": "질문 대응 메모\n\nQ. 해외 제품이 들어오면? 확인된 해외 사례는 모두 영어·항공 교신 중심입니다. 한국어 군 용어와 한국군 교신 절차, 내부망 설치가 진입 장벽이 되고, 저희는 1단계에서 군 용어 보정을 이미 만들고 있습니다."
-        }
-      ]
+      "sceneId": "appG",
+      "notes": "질문 대응 메모\n\nQ. 음성인식이 틀리면 채점도 틀리지 않나? 그래서 단어가 아니라 항목 단위로 대조하고, 확신이 낮으면 교관에게 넘깁니다. 항공관제 연구에서도 단어 단위 대조는 비효율적이었고 개념 단위 대조가 더 견고했습니다."
     },
     {
-      "id": "seq-appI",
-      "label": "부록 9. 무기체계 분류 근거",
-      "slides": [
-        {
-          "sceneId": "appI",
-          "notes": "질문 대응 메모\n\nQ. 교육용인데 무기체계로 인정되나? 훈령의 무기체계 세부분류에 전술훈련모의장비가 명시돼 있습니다. 다만 이 제품이 그 항목으로 분류될지는 신속원이 판단하므로 사전 문의가 첫 확인 항목입니다."
-        }
-      ]
+      "sceneId": "appH",
+      "notes": "질문 대응 메모\n\nQ. 해외 제품이 들어오면? 확인된 해외 사례는 모두 영어·항공 교신 중심입니다. 한국어 군 용어와 한국군 교신 절차, 내부망 설치가 진입 장벽이 되고, 저희는 1단계에서 군 용어 보정을 이미 만들고 있습니다."
     },
     {
-      "id": "seq-appJ",
-      "label": "부록 10. 지원사업 창구 상세",
-      "slides": [
-        {
-          "sceneId": "appJ",
-          "notes": "질문 대응 메모\n\nQ. 신속시범에 선정되면 우리가 개발하나? 공모문상 대상사업 선정 뒤 수행기관은 경쟁입찰 등 별도 절차로 뽑습니다.\n\nQ. 가장 빠른 자금은? K-방산 2단계(2027)입니다. 방향 변경 가능 여부가 첫 확인 항목입니다."
-        }
-      ]
+      "sceneId": "appI",
+      "notes": "질문 대응 메모\n\nQ. 교육용인데 무기체계로 인정되나? 훈령의 무기체계 세부분류에 전술훈련모의장비가 명시돼 있습니다. 다만 이 제품이 그 항목으로 분류될지는 신속원이 판단하므로 사전 문의가 첫 확인 항목입니다."
     },
     {
-      "id": "seq-appK",
-      "label": "부록 11. 리스크 상세 대응표",
-      "slides": [
-        {
-          "sceneId": "appK",
-          "notes": "질문 대응 메모\n\nQ. 가장 큰 리스크는? 실제 수요입니다. 그래서 11월을 개발이 아닌 확인 기간으로 잡았고, 결과를 보고 개발 착수를 다시 결정하자고 제안드립니다."
-        }
-      ]
+      "sceneId": "appJ",
+      "notes": "질문 대응 메모\n\nQ. 신속시범에 선정되면 우리가 개발하나? 공모문상 대상사업 선정 뒤 수행기관은 경쟁입찰 등 별도 절차로 뽑습니다.\n\nQ. 가장 빠른 자금은? K-방산 2단계(2027)입니다. 방향 변경 가능 여부가 첫 확인 항목입니다."
     },
     {
-      "id": "seq-appL",
-      "label": "부록 12. 확장 경로 상세",
-      "slides": [
-        {
-          "sceneId": "appL",
-          "notes": "질문 대응 메모\n\nQ. 원래 2단계 계획(보안형 의사결정 지원 서버)은 버리나? 버리지 않습니다. 실전 단계가 그 계획의 연장선이고, 교육장 데이터가 그 모델을 먼저 키워 줍니다. 2단계 신청 방향은 경북창경 확인 후 정합니다."
-        }
-      ]
+      "sceneId": "appK",
+      "notes": "질문 대응 메모\n\nQ. 가장 큰 리스크는? 실제 수요입니다. 그래서 11월을 개발이 아닌 확인 기간으로 잡았고, 결과를 보고 개발 착수를 다시 결정하자고 제안드립니다."
     },
     {
-      "id": "seq-appM",
-      "label": "부록 13. 아이디어 선정 과정",
-      "slides": [
-        {
-          "sceneId": "appM",
-          "notes": "질문 대응 메모\n\nQ. 드론 탐지는 왜 안 하나? 대드론 예산은 크지만 하드웨어 개발이 필요하고 1단계 자산을 덜 씁니다. 신속시범 수요신청서만 내보는 저비용 베팅으로는 따로 검토할 수 있습니다."
-        }
-      ]
+      "sceneId": "appL",
+      "notes": "질문 대응 메모\n\nQ. 원래 2단계 계획(보안형 의사결정 지원 서버)은 버리나? 버리지 않습니다. 실전 단계가 그 계획의 연장선이고, 교육장 데이터가 그 모델을 먼저 키워 줍니다. 2단계 신청 방향은 경북창경 확인 후 정합니다."
     },
     {
-      "id": "seq-appZ",
-      "label": "출처 전체",
-      "slides": [
-        {
-          "sceneId": "appZ",
-          "notes": "질문 대응 메모\n\n수치 출처 질문이 나오면 이 장을 띄웁니다. 링크를 누르면 원문이 열립니다."
-        }
-      ]
+      "sceneId": "appM",
+      "notes": "질문 대응 메모\n\nQ. 드론 탐지는 왜 안 하나? 대드론 예산은 크지만 하드웨어 개발이 필요하고 1단계 자산을 덜 씁니다. 신속시범 수요신청서만 내보는 저비용 베팅으로는 따로 검토할 수 있습니다."
+    },
+    {
+      "sceneId": "appZ",
+      "notes": "질문 대응 메모\n\n수치 출처 질문이 나오면 이 장을 띄웁니다. 링크를 누르면 원문이 열립니다."
     }
   ]
 }
 </script>
   </hyperframes-slideshow>
+  <div id="refs"></div>
   <div class="progress" id="prog"></div>
 </main>
 
@@ -738,6 +258,7 @@ hyperframes-slideshow .hf-hotspot-pill:focus-visible{outline:2px solid var(--sig
   <button id="next" type="button" aria-label="다음 슬라이드">다음 ▶</button>
   <button id="bF" type="button">전체 화면 (F)</button>
   <button id="bN" type="button" aria-pressed="true">대본 (N)</button>
+  <button id="bBack" type="button" hidden>↩ 보던 장으로</button>
   <span class="ttl" id="ttl"></span>
   <span class="cnt" id="cnt"></span>
 </footer>
@@ -748,28 +269,33 @@ hyperframes-slideshow .hf-hotspot-pill:focus-visible{outline:2px solid var(--sig
 (() => {
   const show = document.getElementById('show');
   const TITLES = {"s0": "표지", "toc": "목차", "s2": "A4AI 자산", "s3": "성능은 데이터가 결정한다", "s4": "군 음성 데이터는 만들어 써야 했다", "s5": "데이터를 만드는 제품", "s6": "훈련도 AI 평가로 간다", "s7": "제품 컨셉", "s8": "동작 방식", "s9": "정답을 우리가 쥔다", "s10": "K-방산 적합성 검증", "s12": "확장 경로", "s13": "실행 계획(안)", "appA": "부록 1. 용어·약어 사전", "appB": "부록 2. 1단계 과제 요약", "appC": "부록 3. 데이터 근거 상세", "appD": "부록 4. 군 음성 데이터 현황", "appE": "부록 5. 국방 AI·예산 동향", "appF": "부록 6. 시나리오 설계 틀(안)", "appG": "부록 7. 채점 기준(안)", "appH": "부록 8. 유사 사례", "appI": "부록 9. 무기체계 분류 근거", "appJ": "부록 10. 지원사업 창구 상세", "appK": "부록 11. 리스크 상세 대응표", "appL": "부록 12. 확장 경로 상세", "appM": "부록 13. 아이디어 선정 과정", "appZ": "출처 전체"};
-  const MAINS = [{"id": "s0", "title": "표지"}, {"id": "toc", "title": "목차"}, {"id": "s2", "title": "A4AI 자산"}, {"id": "s3", "title": "성능은 데이터가 결정한다"}, {"id": "s4", "title": "군 음성 데이터는 만들어 써야 했다"}, {"id": "s5", "title": "데이터를 만드는 제품"}, {"id": "s6", "title": "훈련도 AI 평가로 간다"}, {"id": "s7", "title": "제품 컨셉"}, {"id": "s8", "title": "동작 방식"}, {"id": "s9", "title": "정답을 우리가 쥔다"}, {"id": "s10", "title": "K-방산 적합성 검증"}, {"id": "s12", "title": "확장 경로"}, {"id": "s13", "title": "실행 계획(안)"}];
-  const APPS = [{"seq": "seq-appA", "id": "appA", "title": "부록 1. 용어·약어 사전"}, {"seq": "seq-appB", "id": "appB", "title": "부록 2. 1단계 과제 요약"}, {"seq": "seq-appC", "id": "appC", "title": "부록 3. 데이터 근거 상세"}, {"seq": "seq-appD", "id": "appD", "title": "부록 4. 군 음성 데이터 현황"}, {"seq": "seq-appE", "id": "appE", "title": "부록 5. 국방 AI·예산 동향"}, {"seq": "seq-appF", "id": "appF", "title": "부록 6. 시나리오 설계 틀(안)"}, {"seq": "seq-appG", "id": "appG", "title": "부록 7. 채점 기준(안)"}, {"seq": "seq-appH", "id": "appH", "title": "부록 8. 유사 사례"}, {"seq": "seq-appI", "id": "appI", "title": "부록 9. 무기체계 분류 근거"}, {"seq": "seq-appJ", "id": "appJ", "title": "부록 10. 지원사업 창구 상세"}, {"seq": "seq-appK", "id": "appK", "title": "부록 11. 리스크 상세 대응표"}, {"seq": "seq-appL", "id": "appL", "title": "부록 12. 확장 경로 상세"}, {"seq": "seq-appM", "id": "appM", "title": "부록 13. 아이디어 선정 과정"}, {"seq": "seq-appZ", "id": "appZ", "title": "출처 전체"}];
+  const ALL = [{"id": "s0", "title": "표지"}, {"id": "toc", "title": "목차"}, {"id": "s2", "title": "A4AI 자산"}, {"id": "s3", "title": "성능은 데이터가 결정한다"}, {"id": "s4", "title": "군 음성 데이터는 만들어 써야 했다"}, {"id": "s5", "title": "데이터를 만드는 제품"}, {"id": "s6", "title": "훈련도 AI 평가로 간다"}, {"id": "s7", "title": "제품 컨셉"}, {"id": "s8", "title": "동작 방식"}, {"id": "s9", "title": "정답을 우리가 쥔다"}, {"id": "s10", "title": "K-방산 적합성 검증"}, {"id": "s12", "title": "확장 경로"}, {"id": "s13", "title": "실행 계획(안)"}, {"id": "appA", "title": "부록 1. 용어·약어 사전"}, {"id": "appB", "title": "부록 2. 1단계 과제 요약"}, {"id": "appC", "title": "부록 3. 데이터 근거 상세"}, {"id": "appD", "title": "부록 4. 군 음성 데이터 현황"}, {"id": "appE", "title": "부록 5. 국방 AI·예산 동향"}, {"id": "appF", "title": "부록 6. 시나리오 설계 틀(안)"}, {"id": "appG", "title": "부록 7. 채점 기준(안)"}, {"id": "appH", "title": "부록 8. 유사 사례"}, {"id": "appI", "title": "부록 9. 무기체계 분류 근거"}, {"id": "appJ", "title": "부록 10. 지원사업 창구 상세"}, {"id": "appK", "title": "부록 11. 리스크 상세 대응표"}, {"id": "appL", "title": "부록 12. 확장 경로 상세"}, {"id": "appM", "title": "부록 13. 아이디어 선정 과정"}, {"id": "appZ", "title": "출처 전체"}];
+  const NMAIN = 13; // 앞의 본편 장 수, 그 뒤는 부록
+  const REFS = {"toc": [{"n": "1", "label": "부록 1 참고", "t": 13, "x": 9.088, "y": 90.553}, {"n": "2", "label": "부록 2 참고", "t": 14, "x": 10.651, "y": 90.553}, {"n": "3", "label": "부록 3 참고", "t": 15, "x": 12.213, "y": 90.553}, {"n": "4", "label": "부록 4 참고", "t": 16, "x": 13.776, "y": 90.553}, {"n": "5", "label": "부록 5 참고", "t": 17, "x": 15.338, "y": 90.553}, {"n": "6", "label": "부록 6 참고", "t": 18, "x": 16.9, "y": 90.553}, {"n": "7", "label": "부록 7 참고", "t": 19, "x": 18.462, "y": 90.553}, {"n": "8", "label": "부록 8 참고", "t": 20, "x": 20.025, "y": 90.553}, {"n": "9", "label": "부록 9 참고", "t": 21, "x": 21.587, "y": 90.553}, {"n": "10", "label": "부록 10 참고", "t": 22, "x": 23.338, "y": 90.553}, {"n": "11", "label": "부록 11 참고", "t": 23, "x": 25.276, "y": 90.553}, {"n": "12", "label": "부록 12 참고", "t": 24, "x": 27.213, "y": 90.553}, {"n": "13", "label": "부록 13 참고", "t": 25, "x": 29.151, "y": 90.553}, {"n": "출처", "label": "출처 참고", "t": 26, "x": 31.317, "y": 90.553}], "s2": [{"n": "2", "label": "부록 2 참고", "t": 14, "x": 27.467, "y": 18.666}], "s3": [{"n": "3", "label": "부록 3 참고", "t": 15, "x": 38.945, "y": 24.555}, {"n": "2", "label": "부록 2 참고", "t": 14, "x": 88.76, "y": 61.912}], "s4": [{"n": "4", "label": "부록 4 참고", "t": 16, "x": 14.102, "y": 21.223}, {"n": "3", "label": "부록 3 참고", "t": 15, "x": 63.197, "y": 21.223}, {"n": "4", "label": "부록 4 참고", "t": 16, "x": 17.447, "y": 45.599}], "s6": [{"n": "11", "label": "부록 11 참고", "t": 23, "x": 62.354, "y": 37.322}], "s7": [{"n": "7", "label": "부록 7 참고", "t": 19, "x": 28.031, "y": 48.556}, {"n": "6", "label": "부록 6 참고", "t": 18, "x": 62.529, "y": 20.555}], "s8": [{"n": "2", "label": "부록 2 참고", "t": 14, "x": 62.167, "y": 64.999}, {"n": "7", "label": "부록 7 참고", "t": 19, "x": 68.781, "y": 64.999}], "s9": [{"n": "12", "label": "부록 12 참고", "t": 24, "x": 17.079, "y": 66.109}, {"n": "11", "label": "부록 11 참고", "t": 23, "x": 42.331, "y": 70.664}], "s10": [{"n": "9", "label": "부록 9 참고", "t": 21, "x": 49.764, "y": 24.866}, {"n": "10", "label": "부록 10 참고", "t": 22, "x": 45.547, "y": 47.398}, {"n": "8", "label": "부록 8 참고", "t": 20, "x": 52.243, "y": 60.575}], "s12": [{"n": "12", "label": "부록 12 참고", "t": 24, "x": 42.068, "y": 88.38}], "s13": [{"n": "6", "label": "부록 6 참고", "t": 18, "x": 6.969, "y": 29.182}, {"n": "7", "label": "부록 7 참고", "t": 19, "x": 27.061, "y": 44.436}, {"n": "10", "label": "부록 10 참고", "t": 22, "x": 48.77, "y": 88.046}]};
   const $ = id => document.getElementById(id);
   const ctl = () => show.controller; // 슬라이드쇼 컴포넌트의 컨트롤러(0.8.184 고정)
+  let back = null; // 배지로 부록에 왔을 때 돌아갈 장
 
-  /* ───── 하단 바·대본·진행 막대를 현재 위치에 맞춤 ───── */
+  const go = i => { const c = ctl(); if (c && c.goToSlide) c.goToSlide(i); };
+  function goBack() { const i = back; back = null; if (i !== null) go(i); }
+
+  /* ───── 하단 바·대본·진행 막대·부록 배지를 현재 장에 맞춤 ───── */
   function update() {
     const c = ctl(); if (!c || !c.currentSlide) return;
-    const inBranch = (c.breadcrumb || []).length > 1;
-    const id = c.currentSlide.sceneId, n = c.counter;
+    const id = c.currentSlide.sceneId, i = ALL.findIndex(m => m.id === id);
+    if (i < NMAIN) back = null;
     $('ttl').textContent = TITLES[id] || '';
-    if (inBranch) {
-      $('cnt').textContent = '부록';
-      $('prev').textContent = '◀ 보던 장으로';
-      $('next').textContent = '다음 ▶';
-    } else {
-      const i = MAINS.findIndex(m => m.id === id);
-      $('cnt').textContent = (i + 1) + ' / ' + MAINS.length;
-      $('prog').style.transform = 'scaleX(' + ((i + 1) / MAINS.length) + ')';
-      $('prev').textContent = '◀ 이전';
-      $('next').textContent = '다음 ▶';
-    }
+    $('cnt').textContent = (i + 1) + ' / ' + ALL.length;
+    $('prog').style.transform = 'scaleX(' + ((i + 1) / ALL.length) + ')';
+    $('bBack').hidden = back === null;
+    const refs = $('refs'); refs.textContent = '';
+    (REFS[id] || []).forEach(r => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'rf'; b.textContent = r.n; b.setAttribute('aria-label', r.label);
+      b.style.left = r.x + '%'; b.style.top = r.y + '%';
+      b.onclick = () => { back = i; go(r.t); };
+      refs.appendChild(b);
+    });
     const box = $('notes'); box.textContent = '';
     (c.currentSlide.notes || '').split(/\n\s*\n/).forEach(t => { const p = document.createElement('p'); p.textContent = t; box.appendChild(p); });
   }
@@ -782,9 +308,9 @@ hyperframes-slideshow .hf-hotspot-pill:focus-visible{outline:2px solid var(--sig
 
   const next = () => ctl() && ctl().next();
   const prev = () => ctl() && ctl().prev();
-  const goMain = i => { const c = ctl(); if (!c) return; if ((c.breadcrumb || []).length > 1 && c.backToMain) c.backToMain(); c.goToSlide && c.goToSlide(i); };
   $('prev').onclick = prev;
   $('next').onclick = next;
+  $('bBack').onclick = goBack;
 
   function toggleFull() { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen(); }
   $('bF').onclick = toggleFull;
@@ -794,11 +320,11 @@ hyperframes-slideshow .hf-hotspot-pill:focus-visible{outline:2px solid var(--sig
 
   /* ───── 전체 보기 ───── */
   const list = $('list'), lBody = $('lBody');
+  const item = (m, i) => `<li><button type="button" data-i="${i}"><b>${i < NMAIN ? i + 1 : m.title.split('.')[0]}</b>${i < NMAIN || !m.title.includes('.') ? m.title : m.title.slice(m.title.indexOf('.') + 1).trim()}</button></li>`;
   function openList() {
-    lBody.innerHTML = '<h2>전체 슬라이드</h2><ol>' + MAINS.map((m, i) => `<li><button type="button" data-i="${i}"><b>${i + 1}</b>${m.title}</button></li>`).join('') + '</ol>'
-      + '<h3>부록</h3><ol>' + APPS.map(a => `<li><button type="button" data-seq="${a.seq}"><b>${a.title.split('.')[0]}</b>${a.title.includes('.') ? a.title.slice(a.title.indexOf('.') + 1).trim() : a.title}</button></li>`).join('') + '</ol>';
-    lBody.querySelectorAll('button[data-i]').forEach(b => b.onclick = () => { closeList(); goMain(+b.dataset.i); });
-    lBody.querySelectorAll('button[data-seq]').forEach(b => b.onclick = () => { closeList(); const c = ctl(); if (!c) return; if ((c.breadcrumb || []).length > 1 && c.backToMain) c.backToMain(); c.enterBranch && c.enterBranch(b.dataset.seq); });
+    const items = ALL.map(item);
+    lBody.innerHTML = '<h2>전체 슬라이드</h2><ol>' + items.slice(0, NMAIN).join('') + '</ol><h3>부록 (발표 뒤)</h3><ol>' + items.slice(NMAIN).join('') + '</ol>';
+    lBody.querySelectorAll('button[data-i]').forEach(b => b.onclick = () => { closeList(); go(+b.dataset.i); });
     list.classList.add('on'); $('lClose').focus();
   }
   function closeList() { list.classList.remove('on'); show.focus(); }
@@ -926,9 +452,10 @@ hyperframes-slideshow .hf-hotspot-pill:focus-visible{outline:2px solid var(--sig
     if (introOn) { stop(); closeIntro(); return; }
     if (list.classList.contains('on')) { if (k === 'Escape') { stop(); closeList(); } return; }
     if (k === 'ArrowRight' || k === 'PageDown' || k === ' ') { stop(); next(); }
-    else if (k === 'ArrowLeft' || k === 'PageUp' || k === 'Backspace') { stop(); prev(); }
-    else if (k === 'Home') { stop(); goMain(0); }
-    else if (k === 'End') { stop(); goMain(MAINS.length - 1); }
+    else if (k === 'Backspace') { stop(); if (back !== null) goBack(); else prev(); }
+    else if (k === 'ArrowLeft' || k === 'PageUp') { stop(); prev(); }
+    else if (k === 'Home') { stop(); go(0); }
+    else if (k === 'End') { stop(); go(ALL.length - 1); }
     else if (k === 'f' || k === 'F') { stop(); toggleFull(); }
     else if (k === 'n' || k === 'N') { stop(); toggleNotes(); }
     else if (k === 'p' || k === 'P') stop(); // 이 화면 틀에서는 대본 패널을 쓰므로 별도 발표자 창은 열지 않음
